@@ -1,0 +1,57 @@
+# Sheet: Detail template nguoi tham gia
+Dimensions: A1:J48
+Max row: 48, Max col: 10
+
+## Merged ranges
+
+## Data validations (dropdowns)
+
+## Comments
+
+## Cell dump (non-empty)
+  A1: '●参加者テンプレート一覧画面イメージ'
+  C3: 'Tên của template đang được áp dụng\u3000\u3000\n'
+  D3: ' Số người tham gia'
+  E3: 'Tên công ty của người tham gia bên ngoài + tên người tham gia'
+  F3: 'Tên Người tham gia thuộc công ty mình'
+  G3: 'Memo người tham gia công ty mình'
+  H3: 'Số thứ tự hiển thị'
+  A4: '□'
+  C4: '参加者テンプレート名'
+  D4: '参加人数'
+  E4: '相手先会社名・氏名'
+  F4: '自社参加者名'
+  G4: '自社参加者メモ'
+  H4: '表示順'
+  A5: '□'
+  C5: '○○社用'
+  D5: '4.0'
+  E5: 'HBLAB株式会社 経費 太郎\nHBLAB株式会社 経費 四志夫'
+  F5: '自社 一郎\n宴会 太郎'
+  G5: '他2名'
+  H5: '100.0'
+  A9: '●参加者テンプレート詳細画面イメージ'
+  E12: '1. Tên của template đang được áp dụng\u3000\u3000参加者テンプレート名\n'
+  E14: '2. Số người tham gia\u3000\u3000参加人数\n'
+  E15: 'Ô nhập dạng văn bản.'
+  E16: 'Có thể nhập từ 1 đến 999.'
+  E17: 'Giá trị Default là 0'
+  E20: '3 Tên công ty của người tham gia bên ngoài\u3000他社参加会社名\n'
+  E21: 'Chỉ nhập khi trong phần cài đặt của loại chi phí có bật tùy chọn hiển thị trường nhập người tham gia bên ngoài.'
+  E22: 'Liên quan đến phần checkbox ở màn setting detail mục chi phí'
+  E23: '4. Nút cộng'
+  E24: 'Thêm một cặp ô nhập:'
+  E25: 'Tên công ty bên ngoài'
+  E26: 'Tên người tham gia bên ngoài'
+  E27: 'Có thể thêm tối đa 99 cặp.'
+  E29: '5. Người tham gia thuộc công ty mình\u3000自社参加者\n'
+  E30: 'Danh sách chọn dạng thả xuống ( chỉ tên nhân viên)'
+  E31: 'Có thể chọn tất cả nhân viên có quyền hạn khác  role 1'
+  E32: 'không phụ thuộc vào phòng ban của người tạo đơn.'
+  E33: '6. Nút cộng'
+  E34: 'Thêm một danh sách chọn người tham gia thuộc công ty mình.'
+  E35: 'Có thể thêm tối đa 99 dòng.'
+  E37: '6 . 自社参加者メモ\u3000\u3000Memo người tham gia thuộc công ty mình'
+  E40: '８ .Số thứ tự hiển thị\u3000表示順\n'
+  E41: 'Giá trị mặc định 0'
+  A43: 'Design màn hình'

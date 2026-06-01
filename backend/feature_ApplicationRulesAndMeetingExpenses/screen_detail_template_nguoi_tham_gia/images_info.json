@@ -1,0 +1,26 @@
+[
+  {
+    "embed": "rId1",
+    "media": "xl/media/image20.png",
+    "out": "backend/documents/feature_ApplicationRulesAndMeetingExpenses/screen_detail_template_nguoi_tham_gia\\images\\image_B5.png",
+    "from": "B5",
+    "to": null,
+    "name": "image20.png"
+  },
+  {
+    "embed": "rId2",
+    "media": "xl/media/image17.png",
+    "out": "backend/documents/feature_ApplicationRulesAndMeetingExpenses/screen_detail_template_nguoi_tham_gia\\images\\image_A10.png",
+    "from": "A10",
+    "to": null,
+    "name": "image17.png"
+  },
+  {
+    "embed": "rId3",
+    "media": "xl/media/image22.png",
+    "out": "backend/documents/feature_ApplicationRulesAndMeetingExpenses/screen_detail_template_nguoi_tham_gia\\images\\image_A45.png",
+    "from": "A45",
+    "to": null,
+    "name": "image22.png"
+  }
+]

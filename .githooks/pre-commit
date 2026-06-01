@@ -1,0 +1,11 @@
+#!/bin/sh
+# Chặn commit vào repo CHÍNH nếu chạm path AI (phòng khi git add -f vượt .gitignore).
+# Repo chính trỏ tới hook này qua: git config core.hooksPath documents/.githooks
+blocked=$(git diff --cached --name-only | grep -E '^(documents/|backend/documents/|CLAUDE\.md|\.claude/|\.cursor|backend/\.cursorrules|\.kiro/|\.mcp\.json|\.opencode\.json|AGENTS\.md|GEMINI\.md|\.windsurfrules)')
+if [ -n "$blocked" ]; then
+  echo "❌ Phát hiện file AI trong commit — đã chặn để tránh lộ lên GitHub của KH:"
+  echo "$blocked"
+  echo "Nếu thật sự muốn commit, hãy xem lại — tài liệu/cấu hình AI không được vào repo chính."
+  exit 1
+fi
+exit 0
