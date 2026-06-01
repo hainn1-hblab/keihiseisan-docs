@@ -1,10 +1,10 @@
 ---
-version: 1.1.0
+version: 1.2.0
 status: ready-for-implementation
-last_updated: 2026-06-01
+last_updated: 2026-06-05
 based_on_spec_analysis_version: 1.0.0
-based_on_clarifications_version: 1.0.0
-unresolved_questions_count: 1
+based_on_clarifications_version: 1.1.0
+unresolved_questions_count: 0
 ---
 
 > 📘 **Đây là file spec chốt để implement.**
@@ -83,7 +83,7 @@ Layout & UI behavior: xem mockup `images/image_A10.png`.
 
 | # | Label JP | Tiếng Việt | Kiểu UI | Required | Default | Validation / Rule | DB column |
 |---|---|---|---|---|---|---|---|
-| F1 | 参加者テンプレート名 | Tên template | Text input | **✓ Required** | (trống) | Max 250 ký tự; **unique** trong scope `(hojin_code, jugyoin_id, delete_flag)` của user hiện tại | `sankasha_template_name` (varchar 250) |
+| F1 | 参加者テンプレート名 | Tên template | Text input | **✓ Required** | (trống) | Max 250 ký tự; **unique** trong scope `(hojin_code, jugyoin_id, sankasha_template_name, delete_flag)` — unique theo từng owner (xem 4.7) | `sankasha_template_name` (varchar 250) |
 | F2 | 参加人数 | Số người tham gia | Number input | — | `0` | Cho phép `0`. Khi nhập **> 0** → bắt buộc nằm trong **[1, 999]**. Khi = 0 hoặc bỏ trống → coi như không nhập, **không** chạy validation max | `sanka_ninzu` (numeric 3) |
 | F3 | 他社参加会社名 | Tên công ty bên ngoài | Text input | Tuỳ setting | (trống) | Max 250 ký tự. **Chỉ hiện** khi setting "hiển thị trường nhập người tham gia bên ngoài" của loại chi phí (`tm_keihi_kamoku`) đang BẬT — xem 4.2 | `aitesaki_kaisha_name` (varchar 250) |
 | F3b | (không có label) | Tên người tham gia bên ngoài | Text input | Tuỳ setting | (trống) | Max 250 ký tự. **Placeholder**: "Tên người tham gia bên ngoài". Đi kèm cặp với F3, cùng visibility | `aitesaki_sankasha_name` (varchar 250) |
@@ -199,17 +199,29 @@ Theo wireframe `images/image_A10.png`:
 - Default sort list: `hyoji_jun ASC` (FE truyền lên).
 - `hyoji_jun` của header default `100`. `hyoji_jun` của shosai default `1`.
 
-### 4.7 Access control & ownership (Tech Lead BE đã chốt)
+### 4.7 Access control & ownership (chốt theo clarifications #6.15, #6.16, #6.17, #6.18)
 
-**Nguyên tắc cốt lõi: template người tham gia là dữ liệu thuộc sở hữu của từng user (owner-scoped). Mọi user — kể cả admin role 5/6 — CHỈ thấy và sửa được template do CHÍNH MÌNH tạo, không thấy/sửa template của nhân viên khác trong công ty.**
+**Nguyên tắc cốt lõi: template người tham gia là dữ liệu owner-scoped. Mọi user — kể cả admin role 5/6 — CHỈ thấy/dùng/sửa template do CHÍNH MÌNH tạo. KHÔNG có khái niệm "shared template" giữa các user trong cùng công ty.**
 
-- **Owner**: khi tạo, `tm_sankasha_template.jugyoin_id` được set = `super.getLoginJugyoinId()` (người đang đăng nhập).
-- **Scope hiển thị / sửa / xoá**: mọi truy vấn list / read / update / delete **bắt buộc** filter thêm điều kiện `jugyoin_id = super.getLoginJugyoinId()` (ngoài `hojin_code` + `delete_flag`). Không user nào được thao tác template của user khác.
-- **Đường tạo template**:
-  - User **không** phải role 5/6: tạo template người tham gia **gián tiếp** qua màn tạo meisai (chọn "lưu template" khi đã đính kèm thông tin người tham gia). Chỉ thấy template của chính mình (thông qua template meisai).
-  - User role 5/6 (`DEPARTMENT_MANAGEMENT` / `SUPER_ADMIN`): có thể tạo template meisai master và tạo template người tham gia master để tham chiếu vào template meisai master. Vẫn chỉ thấy/sửa template người tham gia của chính mình.
-- **Hệ quả với unique constraint**: scope unique `(hojin_code, jugyoin_id, sankasha_template_name, delete_flag)` khớp đúng nguyên tắc owner-scoped — 2 user khác nhau được phép có template trùng tên, nhưng cùng 1 user thì không.
-- **`RoleUtil.check`**: vì cả user thường lẫn role 5/6 đều có thể sở hữu template, **không** chặn cứng theo role ở các API CRUD owner-scoped. Việc phân quyền dựa trên ownership (`jugyoin_id`), không dựa trên role. (Khác với giả định ban đầu ở clarification 6.6 — Tech Lead đã chốt lại theo hướng owner-scoped.)
+**Hai entry point tạo template** (cùng ghi vào 1 bảng `tm_sankasha_template`, không phân biệt loại — xem #6.16):
+
+| Entry point | Màn hình | Role được phép | Ghi chú |
+|---|---|---|---|
+| (A) Từ luồng meisai | Màn tạo meisai → chọn "lưu template" (đã đính kèm thông tin người tham gia) | **Mọi role** | User thường tạo template gián tiếp; chỉ thấy lại template của mình khi chọn template lúc tạo meisai |
+| (B) Từ menu Setting | Màn list/detail mô tả trong spec này (`マスタ設定`) | **Chỉ role 5, 6** (`DEPARTMENT_MANAGEMENT`, `SUPER_ADMIN`) | Role 5/6 tạo template người tham gia "master" để tham chiếu vào template meisai master |
+
+- **Truy cập màn này (entry point B)**: chặn bằng `RoleUtil.check(super.getLoginUserDto(), Roles.DEPARTMENT_MANAGEMENT, Roles.SUPER_ADMIN)` ở đầu mỗi service method của các API thuộc màn Setting.
+- **Owner khi insert**: `tm_sankasha_template.jugyoin_id` **luôn** set = `super.getLoginJugyoinId()`. **KHÔNG** nhận `jugyoin_id` từ request body (tránh giả mạo owner) — xem #6.17.
+- **Scope view/sửa/xoá ở MỌI nơi**: mọi truy vấn list / read / update / delete / search **bắt buộc** kèm điều kiện cố định `jugyoin_id = super.getLoginJugyoinId()` (ngoài `hojin_code` + `delete_flag`). Backend không cho FE override filter này. Kể cả role 5/6 cũng không thấy/sửa template của nhân viên khác.
+- **Unique constraint** (xem #6.18): scope `(hojin_code, jugyoin_id, sankasha_template_name, delete_flag)` — user A và user B trong cùng `hojin_code` được phép trùng tên template (vd cùng đặt `○○社用`); cùng 1 user thì không được trùng.
+
+### 4.8 Xử lý 自社参加者 không còn hợp lệ (chốt theo clarification #6.9)
+
+Khi một nhân viên đã được lưu trong template (`tm_sankasha_template_shosai`, `sankasha_kubun = 2`) sau đó bị **xoá** (`delete_flag = 1`) hoặc bị **đổi role thành `NO_RIGHT` (1)**:
+
+- **Không tự động xoá** dòng đó khỏi template (giữ nguyên dữ liệu trong DB).
+- Tại màn **Detail**, dòng đó được hiển thị như **dữ liệu không hợp lệ** (invalid) để user nhận biết.
+- Khi user **cập nhật** template hoặc **áp dụng** template (chọn vào meisai), hệ thống **báo lỗi** và **bắt buộc** user chọn lại nhân viên khác hoặc xoá nhân viên không hợp lệ khỏi template trước khi tiếp tục (không cho lưu/áp dụng khi còn dòng invalid).
 ---
 
 ## 5. Database Schema
@@ -220,7 +232,9 @@ Theo wireframe `images/image_A10.png`:
 
 **Tên hiển thị**: Participant Template
 **Schema dự kiến**: `keihi_com` (theo convention master `tm_*`)
-**Unique constraint**: `(hojin_code, jugyoin_id, sankasha_template_name, delete_flag)`
+**Unique constraint**: `(hojin_code, jugyoin_id, sankasha_template_name, delete_flag)` — đã CONFIRM theo clarification #6.18 (Liquibase tạo unique index đúng scope này).
+
+> 📌 **Không thêm cột `template_kubun`** (chốt theo #6.16): template tạo từ cả 2 entry point — màn tạo meisai (mọi role) và menu Setting (role 5/6) — đều lưu chung vào bảng này, **không** phân biệt "master" vs "cá nhân" qua bất kỳ cột nào. Data hai loại giống hệt nhau, chỉ khác entry point UI.
 
 | Column | Data Type | Length | Nullable | Default | Key | Description |
 |---|---|---|---|---|---|---|
@@ -292,9 +306,9 @@ Theo wireframe `images/image_A10.png`:
 
 | # | Method | Path | Mô tả | Request body | Response |
 |---|---|---|---|---|---|
-| 1 | `POST` | `/sankasha-template/search` | Search list có paging | `SankashaTemplateSearchParameter` (gồm `sankashaTemplateName`, `aitesakiName`, `jishaSankashaName`, `page`, `size`, `sortParameters`) | `ListSankashaTemplate` |
-| 2 | `GET` | `/sankasha-template/{id}` | Lấy chi tiết 1 template + tất cả shosai | — | `SankashaTemplate` (gồm header + danh sách shosai) |
-| 3 | `POST` | `/sankasha-template` | Tạo mới template | `SankashaTemplate` (header + shosai list) | `ModelApiResponse` (message `I001`) |
+| 1 | `POST` | `/sankasha-template/search` | Search list có paging. **Backend luôn add filter cố định `jugyoin_id = super.getLoginJugyoinId()`, KHÔNG cho FE override** (xem #6.17) | `SankashaTemplateSearchParameter` (gồm `sankashaTemplateName`, `aitesakiName`, `jishaSankashaName`, `page`, `size`, `sortParameters`) — **không** có field `jugyoinId` | `ListSankashaTemplate` |
+| 2 | `GET` | `/sankasha-template/{id}` | Lấy chi tiết 1 template + tất cả shosai. Read kèm điều kiện `jugyoin_id = current_user` (404 nếu không thuộc owner) | — | `SankashaTemplate` (gồm header + danh sách shosai) |
+| 3 | `POST` | `/sankasha-template` | Tạo mới template. **`jugyoin_id` set tự động từ login context (`super.getLoginJugyoinId()`), KHÔNG nhận từ request body** (xem #6.17) | `SankashaTemplate` (header + shosai list) — bỏ qua mọi `jugyoinId` client gửi lên | `ModelApiResponse` (message `I001`) |
 | 4 | `PUT` | `/sankasha-template/{id}` | Cập nhật template | `SankashaTemplate` (header + shosai list mới — thay thế toàn bộ shosai cũ) | `ModelApiResponse` (message `I002`) |
 | 5 | `DELETE` | `/sankasha-template/{id}` | Xoá 1 template (soft) | Query/body chứa `updateVersion` | `ModelApiResponse` (message `I003`) |
 | 6 | `DELETE` | `/sankasha-template` | Bulk xoá (soft) | List `{id, updateVersion}` | `ModelApiResponse` (message `I006`) |
@@ -310,7 +324,7 @@ Theo wireframe `images/image_A10.png`:
 - Repository: `TmSankashaTemplateRepository`, `TmSankashaTemplateShosaiRepository`
 - Bean config: `SankashaTemplateConfiguration`
 
-**Phân quyền (owner-scoped — xem 4.7)**: KHÔNG chặn cứng theo role. Mọi method CRUD lọc theo owner `jugyoin_id = super.getLoginJugyoinId()`; user chỉ thao tác được template của chính mình.
+**Phân quyền (xem 4.7)**: các endpoint của **màn Setting này (entry point B)** chặn bằng `RoleUtil.check(super.getLoginUserDto(), Roles.DEPARTMENT_MANAGEMENT, Roles.SUPER_ADMIN)` — chỉ role 5/6 vào được. Đồng thời **owner-scoped**: mọi method CRUD/search lọc cố định theo `jugyoin_id = super.getLoginJugyoinId()`, user chỉ thao tác template của chính mình (kể cả role 5/6 cũng không thấy template của user khác). (API tạo template từ luồng meisai — entry point A, mọi role — là API khác, ngoài phạm vi màn này.)
 
 ---
 
@@ -318,13 +332,17 @@ Theo wireframe `images/image_A10.png`:
 
 | # | Điểm TBD | Assumption tạm | Severity | Câu hỏi gốc | Cần PO trả lời trước |
 |---|---|---|---|---|---|
-| 1 | **(6.9)** Khi nhân viên (đã có trong template) bị xoá hoặc đổi role thành `NO_RIGHT` thì template xử lý thế nào? (ẩn / cảnh báo / giữ nguyên / auto xoá) | **Giữ nguyên** trong DB. Khi render: vẫn show employee bằng cách query `tm_jugyoin` (kể cả `delete_flag=1`), nhưng append suffix `(削除済)` cho UI. Không auto xoá khỏi template, không block. | **Medium** | `clarifications.md` mục 6.9 | Trước UAT (ảnh hưởng UX & xử lý FE/BE khi list/show) |
 | 2 | **(6.7)** `自社参加者メモ` (`tm_sankasha_template.memo`) có cho xuống dòng (multi-line) không? | Cho phép xuống dòng vì DB kiểu `text`. FE render `<textarea>` thay vì `<input>`. | **Low** | `clarifications.md` mục 6.7 (cột "Cho xuống dòng" của hàng `自社参加者メモ` còn `?`) | Trước UAT |
 | 3 | **(6.14)** Danh sách cột list được phép sort | Backend support sort theo mọi cột physical của `tm_sankasha_template` (`sankasha_template_name`, `sanka_ninzu`, `hyoji_jun`). FE chốt sort UI sau. | **Low** | `clarifications.md` mục 6.14 (table bên trong còn `?`) | Trước UAT |
-| 4 | ✅ **RESOLVED** — Quan hệ giữa schema (`jugyoin_id` per-employee owner) và access control. | **Đã chốt (Tech Lead BE)**: template là owner-scoped. `jugyoin_id` = `super.getLoginJugyoinId()`; mọi user (kể cả role 5/6) chỉ thấy/sửa template của chính mình. Không phân quyền theo role. Xem mục 4.7. | ~~High~~ → Resolved | (Tech Lead BE confirm trong `final_spec.md` v1.0.0) | ✅ Đã giải quyết |
 | 5 | (mới) `tm_sankasha_template` cần thêm `update_version` (optimistic lock) theo convention dự án — file thiết kế xlsx không có. | Bổ sung `update_version NUMBER(4) defaultValueNumeric="1"` trong Liquibase changeset. | **Low** | (phát sinh từ convention) | Trước khi merge changeset đầu tiên |
 | 6 | (mới) `tm_sankasha_template_shosai` cần thêm `delete_flag` + `update_version` theo convention — file thiết kế không có. | Soft delete shosai có thể bỏ qua (vì save = replace all shosai). Nhưng vẫn nên có 2 cột này theo convention. Bổ sung trong Liquibase. | **Low** | (phát sinh từ convention) | Trước khi merge changeset đầu tiên |
 | 7 | (mới) Cột nào trong `tm_keihi_kamoku` điều khiển visibility của khối 他社参加者 (xem 4.2)? | Sẽ xác định khi implement sheet `Setting detail mục chi phí`. Backend service nhận flag dạng boolean qua API hoặc đọc trực tiếp từ `tm_keihi_kamoku` — quyết định khi review chéo 2 sheet. | **Medium** | (cross-sheet dependency — không thuộc spec sheet này) | Trước khi implement validation conditional |
+
+> **Đã resolved (gỡ khỏi bảng trên)**:
+> - ~~#1 (6.9)~~ — Xử lý 自社参加者 không hợp lệ: đã chốt, chuyển thành business rule **mục 4.8**.
+> - ~~#4~~ — Access control vs ownership: đã chốt qua clarifications #6.15–#6.18, chuyển thành **mục 4.7**.
+
+**Giữ nguyên ID gốc** (#2, #3, #5, #6, #7) để không phá vỡ tham chiếu chéo từ các tài liệu khác.
 
 **Severity legend**:
 - **High** — Sai assumption phải sửa schema/API contract.
@@ -336,7 +354,7 @@ Theo wireframe `images/image_A10.png`:
 ## 8. References
 
 - Spec analysis: [`spec_analysis.md`](./spec_analysis.md) (v1.0.0)
-- Clarifications: [`clarifications.md`](./clarifications.md) (v1.0.0 — đã trả lời 13/14, còn 1 pending: 6.9)
+- Clarifications: [`clarifications.md`](./clarifications.md) (v1.1.0 — đã trả lời toàn bộ, gồm cả 6.9 và 6.15–6.18; 0 câu pending)
 - DB design: `backend/documents/feature_ApplicationRulesAndMeetingExpenses/db_tables_application_rules_meeting_expenses.xlsx` (sheets: `tm_sankasha_template`, `tm_sankasha_template_shosai`, `Relations`, `Overview`)
 - Roles enum: `backend/src/main/java/jp/co/keihi/application/enums/Roles.java`
 - Convention rules:
@@ -350,6 +368,17 @@ Theo wireframe `images/image_A10.png`:
 ---
 
 ## Version History
+
+### [1.2.0] - 2026-06-02
+
+- **Formalize & resolve TBD #4 (access control vs ownership)** qua clarifications #6.15, #6.16, #6.17, #6.18 (thay cho note inline của Tech Lead ở v1.1.0).
+- **Section 4.7** refine: làm rõ **2 entry point** tạo template — (A) màn meisai (mọi role), (B) menu Setting màn này (chỉ role 5/6); filter cố định `jugyoin_id = current_user`; insert set `jugyoin_id` từ login context, không nhận từ request body; không share template giữa user.
+- **Section 5.1**: CONFIRM unique scope `(hojin_code, jugyoin_id, sankasha_template_name, delete_flag)`; CONFIRM **không** thêm cột `template_kubun` (2 entry point lưu chung 1 bảng).
+- **Section 6**: API search add filter cố định `jugyoin_id = current_user` (FE không override); API create set `jugyoin_id` tự động; khôi phục `RoleUtil.check` role 5/6 cho các endpoint màn Setting.
+- **Section 3.1**: sửa unique scope của F1 cho đầy đủ (thêm `sankasha_template_name`).
+- **Section 4.8 (mới)**: chốt theo #6.9 — 自社参加者 không hợp lệ (bị xoá/đổi role NO_RIGHT) giữ nguyên trong DB, hiển thị invalid ở Detail, báo lỗi & bắt chọn lại khi update/áp dụng. Resolve TBD #1.
+- **Section 7**: gỡ TBD #1 (→ 4.8) và #4 (→ 4.7). Còn **5 điểm TBD** — 0 High, 1 Medium (#7), 4 Low (#2, #3, #5, #6).
+- Note: version nhảy `1.1.0 → 1.2.0` vì entry `[1.1.0]` đã tồn tại (interim resolution ngày 2026-06-01).
 
 ### [1.1.0] - 2026-06-01
 

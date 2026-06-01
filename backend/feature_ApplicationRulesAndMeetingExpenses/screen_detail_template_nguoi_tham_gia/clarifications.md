@@ -1,9 +1,9 @@
 ---
-version: 1.0.0
+version: 1.1.0
 status: draft
-last_updated: 2026-05-28
+last_updated: 2026-06-01
 related_spec: ./spec_analysis.md
-related_spec_version: 1.0.0
+related_spec_version: 1.1.0
 changelog_file: ./CHANGELOG.md
 ---
 
@@ -176,7 +176,7 @@ Có cho phép 2 template trùng `参加者テンプレート名` không? Master 
 
 ## 6.9 Quan hệ với 自社参加者 đã chọn
 
-**Status**: 🔴 PENDING
+**Status**: 🟢 Answered
 
 **Câu hỏi**:
 Khi nhân viên được chọn vào template sau đó bị **xoá** (delete_flag = 1) hoặc **đổi role thành role 1** thì template phải xử lý thế nào?
@@ -186,11 +186,17 @@ Khi nhân viên được chọn vào template sau đó bị **xoá** (delete_fla
 - (d) Tự động xoá dòng đó khỏi template?
 
 **Trả lời**:
+Trường hợp người tham gia thuộc công ty mình đã được lưu trong template người tham gia, sau đó người đó bị xóa (delete_flag = 1) hoặc bị thay đổi thành không có quyền (role = 1), thì không tự động xóa dữ liệu template.
+
+Thay vào đó, tại màn hình chi tiết, dữ liệu đó sẽ được hiển thị như dữ liệu không hợp lệ.
+
+Khi người dùng cập nhật hoặc áp dụng template, hệ thống sẽ báo lỗi và yêu cầu người dùng chọn lại hoặc xóa người tham gia đó khỏi template.
 
 
-**Người trả lời**: DucNA1(Lead BE)
-**Ngày trả lời**: 28/5/2026
-**Nguồn**:Đã trao đổi trong meet
+
+**Người trả lời**: DuongDV2(FPM)
+**Ngày trả lời**: 01/6/2026
+**Nguồn**:https://docs.google.com/spreadsheets/d/1CZFyUKEIbrYgelB_Jc9gfntP0_AkdlCisIdI0TV1kRg/edit?gid=2052317540#gid=2052317540&range=67:67
 
 ---
 
@@ -304,12 +310,59 @@ Techlead BE confirm: tm_sankasha_template.jugyoin_id sẽ được set bằng `s
 User role 5, 6 không có thể thấy/sửa template của nhân viên trong công ty(chỉ view được của chính mình)
 User role 5, 6 có thể tạo template meisai master và có thể tạo template người tham gia master để tham chiếu vào template meisai master nhưng không thể thấy/sửa template người tham gia của nhân viên trong công ty(chỉ view được của chính mình)
 
-**Người trả lời**: [Tên PO]
-**Ngày trả lời**: 2026-06-05
-**Nguồn**: Slack #project-keihi message ID xxx / Meeting note 2026-06-05
+**Người trả lời**: Lead BE (DucNA1)
+**Ngày trả lời**: 2026-06-01
 **Impact**:
 - Đã update final_spec.md section 4.7, 5.1 unique constraint.
 - final_spec bump v1.0.0 → v1.1.0.
+
+## 6.16 Template lưu chung 1 bảng hay tách bảng?
+
+**Status**: 🟢 ANSWERED
+
+**Câu hỏi**:
+Template tạo từ luồng A (qua màn meisai) và luồng B (qua menu Setting, role 5/6) lưu chung 1 bảng `tm_sankasha_template` hay riêng?
+Có cần thêm cột `template_kubun` (1=cá nhân, 2=master) để phân biệt không?
+
+**Trả lời**: Lưu CHUNG 1 bảng `tm_sankasha_template`. KHÔNG cần thêm cột `template_kubun`. "Template master" và "template cá nhân" giống hệt nhau về data, chỉ khác entry point UI (màn meisai vs menu Setting).
+
+**Người trả lời**: Lead BE (DucNA1)
+**Ngày trả lời**: 2026-06-01
+**Impact**: final_spec.md section 5.1 giữ nguyên schema, không phát sinh column mới.
+
+---
+
+## 6.17 Master template có share giữa các user không?
+
+**Status**: 🟢 ANSWERED
+
+**Câu hỏi**:
+Template do role 5, 6 tạo từ menu Setting có được dùng làm master tham chiếu cho `tm_meisai_template` của user khác không?
+
+**Trả lời**: KHÔNG. Mọi user (kể cả role 5, 6) chỉ thấy/dùng được template do CHÍNH MÌNH tạo. Filter cố định: `WHERE jugyoin_id = current_user`. Khi insert: `jugyoin_id = super.getLoginJugyoinId()`.
+
+Nghĩa là không có khái niệm "shared template" giữa các user trong cùng công ty. Master và cá nhân giống nhau về data.
+
+**Người trả lời**: Lead BE (DucNA1)
+**Ngày trả lời**: 2026-06-01
+**Impact**:
+- API search: backend luôn add filter `jugyoin_id = current_user`, không cho FE override.
+- API create: `jugyoin_id` set tự động từ context, không nhận từ request body.
+
+---
+
+## 6.18 Unique constraint scope
+
+**Status**: 🟢 ANSWERED
+
+**Câu hỏi**:
+Unique scope là `(hojin_code, jugyoin_id, sankasha_template_name, delete_flag)`? Nghĩa là user A và user B có thể cùng đặt tên `○○社用`?
+
+**Trả lời**: Đúng. Unique scope = `(hojin_code, jugyoin_id, sankasha_template_name, delete_flag)`. User A và user B trong cùng `hojin_code` có thể cùng đặt tên template `○○社用` mà không bị conflict.
+
+**Người trả lời**: Lead BE (DucNA1)
+**Ngày trả lời**: 2026-06-01
+**Impact**: Liquibase changeset tạo unique index với đúng scope này. API create check E040 với điều kiện `WHERE hojin_code = ? AND jugyoin_id = ? AND name = ? AND delete_flag = 0`.
 
 ## Sign-off
 

@@ -10,6 +10,36 @@ Format dựa trên [Keep a Changelog](https://keepachangelog.com/), versioning t
 
 ---
 
+## [1.2.0] - 2026-06-01
+
+### Changed
+- `final_spec.md` bumped to v1.1.0 — resolved TBD #4 (access control vs ownership).
+- `clarifications.md` bumped to v1.1.0 — added 3 new Q&A entries (6.16, 6.17, 6.18) làm rõ access model.
+
+### Resolved
+- Mô hình 2 entry point tạo template (qua màn meisai + qua menu Setting) đã được Tech Lead confirm.
+- Schema KHÔNG cần thêm cột `template_kubun`.
+- Filter cố định `jugyoin_id = current_user`, không có shared template.
+- Unique constraint scope = `(hojin_code, jugyoin_id, sankasha_template_name, delete_flag)`.
+
+### Notes
+- final_spec.md status đổi từ `partial-ready` → [`ready-for-implementation` hoặc `partial-ready`] (tuỳ kết quả Việc 2).
+- Sẵn sàng tiến hành: viết Liquibase changeset → Entity → Repository.
+
+## [1.1.0] - 2026-06-01
+
+### Added
+- File `final_spec.md` — spec chốt để implement (merge spec_analysis + clarifications + DB design xlsx).
+
+### Changed
+- `final_spec.md` v1.1.0: resolve TBD #4 (High) theo Tech Lead BE — template owner-scoped (`jugyoin_id = loginJugyoinId`); nâng status lên ready-for-implementation.
+
+### Source
+- Tech Lead BE confirm (owner-scoped access control).
+- PO/BA trả lời 13/14 câu clarifications (meeting 2026-05-28); mục 6.9 còn pending.
+- Schema từ `db_tables_application_rules_meeting_expenses.xlsx`.
+
+
 ## [1.1.0] - 2026-05-28
 
 ### Added
