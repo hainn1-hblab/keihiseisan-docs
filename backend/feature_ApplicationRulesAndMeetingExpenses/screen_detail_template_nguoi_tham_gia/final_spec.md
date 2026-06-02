@@ -1,5 +1,5 @@
 ---
-version: 1.2.0
+version: 1.2.1
 status: ready-for-implementation
 last_updated: 2026-06-05
 based_on_spec_analysis_version: 1.0.0
@@ -262,11 +262,12 @@ Khi một nhân viên đã được lưu trong template (`tm_sankasha_template_s
 
 **Tên hiển thị**: Participant Template Detail
 **Schema dự kiến**: `keihi_com`
-**Index**: `(sankasha_template_id, sankasha_kubun, hyoji_jun)`
+**Index**: `(hojin_code, sankasha_template_id, sankasha_kubun, hyoji_jun)`
 
 | Column | Data Type | Length | Nullable | Default | Key | Description |
 |---|---|---|---|---|---|---|
 | `sankasha_template_shosai_id` | varchar | 29 | No | — | **PK** | Primary key — Participant template detail ID (参加者テンプレート詳細ID) |
+| `hojin_code` | varchar | 5 | No | — | — | Company/tenant code (法人コード) — **bổ sung theo convention multi-tenant** (xem note dưới) |
 | `sankasha_template_id` | varchar | 29 | No | — | **FK** → `tm_sankasha_template` | Reference to parent template (参加者テンプレートID) |
 | `sankasha_kubun` | numeric | 1 | No | — | — | Participant type (参加者区分): `1` = External, `2` = Internal |
 | `aitesaki_kaisha_name` | varchar | 250 | Yes | — | — | External company name (相手先会社名) — dùng khi kubun=1 |
@@ -283,7 +284,10 @@ Khi một nhân viên đã được lưu trong template (`tm_sankasha_template_s
 | `add_userid` | VARCHAR(29) | データの作成ユーザーID |
 | `upd_userid` | VARCHAR(29) | データの更新ユーザーID |
 
-**Note dev**: cũng nên có `delete_flag` + `update_version` theo convention (hiện file thiết kế không liệt kê — đánh dấu vào section 7 để confirm).
+**Note dev**:
+- `hojin_code` (VARCHAR(5), NOT NULL): **bổ sung** vào bảng shosai (file thiết kế xlsx gốc và §5.2 ban đầu KHÔNG có). Lý do: convention multi-tenant của dự án (`.claude/rules/database.md` §8) yêu cầu mọi bảng nghiệp vụ có `hojin_code`, và các bảng detail tương tự (`tm_shucchou_area_yakushoku`) đều có. Giúp query/filter trực tiếp theo tenant mà không phải join lên header. Service set `hojin_code = super.getHojinCode()` khi insert shosai.
+- `delete_flag` + `update_version`: cũng bổ sung theo convention (file thiết kế không liệt kê).
+- Cả 3 cột trên đã được phản ánh trong Liquibase changeset `tm_sankasha_template_shosai.xml`.
 
 ### 5.3 Quan hệ giữa các bảng
 
@@ -368,6 +372,12 @@ Khi một nhân viên đã được lưu trong template (`tm_sankasha_template_s
 ---
 
 ## Version History
+
+### [1.2.1] - 2026-06-02
+
+- **Section 5.2**: bổ sung cột `hojin_code` (VARCHAR(5), NOT NULL) vào bảng `tm_sankasha_template_shosai` theo convention multi-tenant; cập nhật index thành `(hojin_code, sankasha_template_id, sankasha_kubun, hyoji_jun)`.
+- Đồng bộ với Liquibase changeset `tm_sankasha_template_shosai.xml` (đã thêm column + leading column trong search index).
+- Service insert shosai phải set `hojin_code = super.getHojinCode()`.
 
 ### [1.2.0] - 2026-06-02
 

@@ -10,6 +10,19 @@ Format dựa trên [Keep a Changelog](https://keepachangelog.com/), versioning t
 
 ---
 
+## [Unreleased] - 2026-06-02
+
+### Added
+- `apis/sankasha-template-update/detail_design.md` v1.0.0 — detail design API update (`PUT /sankasha-template/{id}`), kèm `request_examples.json` + `response_examples.json`.
+
+### Changed
+- `apis/sankasha-template-create/detail_design.md` → v1.0.1 (patch): đồng bộ final_spec v1.2.1 — bổ sung set `hojin_code = super.getHojinCode()` cho từng shosai (§4.1 step 9, §5.1); bump `based_on_final_spec_version` 1.2.0 → 1.2.1. Không đổi API contract.
+
+### Notes
+- Reuse pattern từ API create; expand các điểm khác: path param `{id}`, `updateVersion` (optimistic lock), read owner-scoped → 404, skip-self unique check, replace-all shosai (final_spec §4.4/§4.6), employee validation bắt buộc (§4.8), success message `I002`.
+- Verify pattern với `MeisaiTemplateService.update/validation/blindData`.
+- 4 TBD riêng cho update (0 High, 2 Medium: #U1 hard/soft delete shosai, #U2 mapping OptimisticLockException; 2 Low: #U3, #U4) + kế thừa TBD chung của create.
+
 ## [1.2.0] - 2026-06-01
 
 ### Changed

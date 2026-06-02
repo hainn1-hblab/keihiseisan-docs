@@ -1,0 +1,119 @@
+[
+  {
+    "name": "success",
+    "http_status": 200,
+    "description": "Tạo template thành công",
+    "body": {
+      "code": 0,
+      "type": "success",
+      "message": "登録が完了しました。"
+    }
+  },
+  {
+    "name": "error_required_field",
+    "http_status": 400,
+    "description": "Thiếu field bắt buộc (sankashaTemplateName rỗng, shosaiList rỗng). Project convention: validation map.",
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "リクエストが不正です。",
+      "status": 400,
+      "path": "/api/v1/sankasha-template",
+      "timestamp": "2026-06-05 10:00:00",
+      "error": {
+        "sankashaTemplateName": "参加者テンプレート名は必須です。",
+        "shosaiList": "参加者を1件以上指定してください。"
+      }
+    }
+  },
+  {
+    "name": "error_sanka_ninzu_range",
+    "http_status": 400,
+    "description": "sankaNinzu > 999 (khi > 0). Message key TBD — xem detail_design §9 C2.",
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "リクエストが不正です。",
+      "status": 400,
+      "path": "/api/v1/sankasha-template",
+      "timestamp": "2026-06-05 10:00:00",
+      "error": {
+        "sankaNinzu": "参加人数は1〜999で入力してください。"
+      }
+    }
+  },
+  {
+    "name": "error_external_over_99",
+    "http_status": 400,
+    "description": "count(kubun=1) > 99. Đếm riêng external, KHÔNG đếm tổng.",
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "リクエストが不正です。",
+      "status": 400,
+      "path": "/api/v1/sankasha-template",
+      "timestamp": "2026-06-05 10:00:00",
+      "error": {
+        "shosaiList": "他社参加者は最大99件まで登録できます。"
+      }
+    }
+  },
+  {
+    "name": "error_internal_over_99",
+    "http_status": 400,
+    "description": "count(kubun=2) > 99. Đếm riêng internal.",
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "リクエストが不正です。",
+      "status": 400,
+      "path": "/api/v1/sankasha-template",
+      "timestamp": "2026-06-05 10:00:00",
+      "error": {
+        "shosaiList": "自社参加者は最大99件まで登録できます。"
+      }
+    }
+  },
+  {
+    "name": "error_conditional_kubun",
+    "http_status": 400,
+    "description": "Conditional fail: kubun=1 thiếu external field, hoặc kubun=2 thiếu jishaSankashaJugyoinId / employee không hợp lệ (role=NO_RIGHT / đã xoá).",
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "リクエストが不正です。",
+      "status": 400,
+      "path": "/api/v1/sankasha-template",
+      "timestamp": "2026-06-05 10:00:00",
+      "error": {
+        "shosaiList[2].jishaSankashaJugyoinId": "有効な自社参加者を選択してください。"
+      }
+    }
+  },
+  {
+    "name": "error_duplicate_name",
+    "http_status": 400,
+    "description": "Trùng tên template trong scope (hojin_code, jugyoin_id, name, delete_flag=0). E040 → HTTP 400 (KHÔNG 409, theo MeisaiTemplateService).",
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "「○○社用」は既に登録されている参加者テンプレート名です。",
+      "status": 400,
+      "path": "/api/v1/sankasha-template",
+      "timestamp": "2026-06-05 10:00:00"
+    }
+  },
+  {
+    "name": "error_forbidden_role",
+    "http_status": 403,
+    "description": "Role gọi API không thuộc {DEPARTMENT_MANAGEMENT, SUPER_ADMIN}. Ném từ RoleUtil.check.",
+    "body": {
+      "code": 3,
+      "type": "forbidden",
+      "message": "アクセス権限がありません。",
+      "status": 403,
+      "path": "/api/v1/sankasha-template",
+      "timestamp": "2026-06-05 10:00:00"
+    }
+  }
+]

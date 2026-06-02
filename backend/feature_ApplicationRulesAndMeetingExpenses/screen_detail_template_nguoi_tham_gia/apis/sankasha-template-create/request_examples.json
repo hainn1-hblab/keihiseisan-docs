@@ -1,0 +1,88 @@
+[
+  {
+    "name": "happy_case",
+    "description": "1 external + 1 internal participant, đầy đủ field",
+    "body": {
+      "sankashaTemplateName": "○○社用",
+      "sankaNinzu": 4,
+      "memo": "他2名",
+      "hyojiJun": 100,
+      "shosaiList": [
+        {
+          "sankashaKubun": 1,
+          "aitesakiKaishaName": "HBLAB株式会社",
+          "aitesakiSankashaName": "経費 太郎",
+          "hyojiJun": 1
+        },
+        {
+          "sankashaKubun": 1,
+          "aitesakiKaishaName": "HBLAB株式会社",
+          "aitesakiSankashaName": "経費 四志夫",
+          "hyojiJun": 2
+        },
+        {
+          "sankashaKubun": 2,
+          "jishaSankashaJugyoinId": "TM00700001202401010900xxAB",
+          "hyojiJun": 3
+        }
+      ]
+    }
+  },
+  {
+    "name": "edge_99_external",
+    "description": "Đúng giới hạn tối đa 99 cặp external (chỉ minh hoạ 2 phần tử đầu + cuối)",
+    "note": "Thực tế gửi đủ 99 phần tử kubun=1. count(kubun=1) = 99 → hợp lệ.",
+    "body": {
+      "sankashaTemplateName": "大型接待テンプレート",
+      "sankaNinzu": 99,
+      "memo": null,
+      "hyojiJun": 100,
+      "shosaiList": [
+        { "sankashaKubun": 1, "aitesakiKaishaName": "会社1", "aitesakiSankashaName": "氏名1", "hyojiJun": 1 },
+        { "sankashaKubun": 1, "aitesakiKaishaName": "会社99", "aitesakiSankashaName": "氏名99", "hyojiJun": 99 }
+      ]
+    }
+  },
+  {
+    "name": "edge_sanka_ninzu_zero",
+    "description": "sankaNinzu = 0 (cho phép — không trigger validation max)",
+    "body": {
+      "sankashaTemplateName": "未確定人数テンプレート",
+      "sankaNinzu": 0,
+      "memo": "人数未定",
+      "hyojiJun": 100,
+      "shosaiList": [
+        {
+          "sankashaKubun": 2,
+          "jishaSankashaJugyoinId": "TM00700001202401010900xxCD",
+          "hyojiJun": 1
+        }
+      ]
+    }
+  },
+  {
+    "name": "edge_internal_only",
+    "description": "Chỉ có internal participant (không có external)",
+    "body": {
+      "sankashaTemplateName": "社内会議テンプレート",
+      "sankaNinzu": 3,
+      "memo": null,
+      "hyojiJun": 50,
+      "shosaiList": [
+        { "sankashaKubun": 2, "jishaSankashaJugyoinId": "TM00700001202401010900xxAB", "hyojiJun": 1 },
+        { "sankashaKubun": 2, "jishaSankashaJugyoinId": "TM00700001202401010900xxCD", "hyojiJun": 2 },
+        { "sankashaKubun": 2, "jishaSankashaJugyoinId": "TM00700001202401010900xxEF", "hyojiJun": 3 }
+      ]
+    }
+  },
+  {
+    "name": "edge_min_required",
+    "description": "Chỉ truyền field bắt buộc (hyojiJun/sankaNinzu/memo bỏ trống → default)",
+    "body": {
+      "sankashaTemplateName": "最小テンプレート",
+      "shosaiList": [
+        { "sankashaKubun": 1, "aitesakiKaishaName": "取引先A", "aitesakiSankashaName": "担当 一郎" }
+      ]
+    }
+  }
+]
