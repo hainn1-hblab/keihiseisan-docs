@@ -1,0 +1,113 @@
+[
+  {
+    "name": "success",
+    "http_status": 200,
+    "description": "Update template thành công (message I002).",
+    "body": {
+      "code": 0,
+      "type": "success",
+      "message": "更新が完了しました。"
+    }
+  },
+  {
+    "name": "error_not_found",
+    "http_status": 404,
+    "description": "id không tồn tại / đã xoá / không thuộc owner (read owner-scoped trả null). E041.",
+    "body": {
+      "code": 4,
+      "type": "not_found",
+      "message": "「TM06500001202401010900xxZZ」の参加者テンプレートIDは存在しません。",
+      "status": 404,
+      "path": "/api/v1/sankasha-template/TM06500001202401010900xxZZ",
+      "timestamp": "2026-06-02 10:00:00"
+    }
+  },
+  {
+    "name": "error_version_conflict",
+    "http_status": 400,
+    "description": "updateVersion lệch version DB → OptimisticLockException. HTTP status (409 vs 400) + message key cần verify handler dự án (detail_design §9 U2).",
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "他のユーザーによって更新されています。最新の情報を取得してください。",
+      "status": 400,
+      "path": "/api/v1/sankasha-template/TM06500001202401010900xxZZ",
+      "timestamp": "2026-06-02 10:00:00"
+    }
+  },
+  {
+    "name": "error_version_null",
+    "http_status": 400,
+    "description": "Thiếu updateVersion (@NotNull).",
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "リクエストが不正です。",
+      "status": 400,
+      "path": "/api/v1/sankasha-template/TM06500001202401010900xxZZ",
+      "timestamp": "2026-06-02 10:00:00",
+      "error": {
+        "updateVersion": "更新バージョンは必須です。"
+      }
+    }
+  },
+  {
+    "name": "error_duplicate_name",
+    "http_status": 400,
+    "description": "Đổi tên trùng template KHÁC của chính user (skip-self không áp dụng vì khác id). E040 → 400.",
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "「○○社用」は既に登録されている参加者テンプレート名です。",
+      "status": 400,
+      "path": "/api/v1/sankasha-template/TM06500001202401010900xxZZ",
+      "timestamp": "2026-06-02 10:00:00"
+    }
+  },
+  {
+    "name": "error_invalid_employee",
+    "http_status": 400,
+    "description": "shosai kubun=2 trỏ employee không hợp lệ (đã xoá / role NO_RIGHT). Update bắt buộc chặn (final_spec §4.8).",
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "リクエストが不正です。",
+      "status": 400,
+      "path": "/api/v1/sankasha-template/TM06500001202401010900xxZZ",
+      "timestamp": "2026-06-02 10:00:00",
+      "error": {
+        "shosaiList[0].jishaSankashaJugyoinId": "有効な自社参加者を選択してください。"
+      }
+    }
+  },
+  {
+    "name": "error_required_field",
+    "http_status": 400,
+    "description": "Bean validation fail (sankashaTemplateName rỗng, shosaiList rỗng).",
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "リクエストが不正です。",
+      "status": 400,
+      "path": "/api/v1/sankasha-template/TM06500001202401010900xxZZ",
+      "timestamp": "2026-06-02 10:00:00",
+      "error": {
+        "sankashaTemplateName": "参加者テンプレート名は必須です。",
+        "shosaiList": "参加者を1件以上指定してください。"
+      }
+    }
+  },
+  {
+    "name": "error_forbidden_role",
+    "http_status": 403,
+    "description": "Role gọi API không thuộc {DEPARTMENT_MANAGEMENT, SUPER_ADMIN}.",
+    "body": {
+      "code": 3,
+      "type": "forbidden",
+      "message": "アクセス権限がありません。",
+      "status": 403,
+      "path": "/api/v1/sankasha-template/TM06500001202401010900xxZZ",
+      "timestamp": "2026-06-02 10:00:00"
+    }
+  }
+]

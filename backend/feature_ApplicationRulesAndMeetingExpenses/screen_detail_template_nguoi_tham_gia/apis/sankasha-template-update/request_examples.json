@@ -1,0 +1,114 @@
+[
+  {
+    "name": "happy_case",
+    "description": "Update header + thay thế toàn bộ shosai (1 external + 1 internal). updateVersion khớp version DB hiện tại.",
+    "path_param": { "id": "TM06500001202401010900xxZZ" },
+    "body": {
+      "sankashaTemplateName": "○○社用（改）",
+      "sankaNinzu": 3,
+      "memo": "メンバー差し替え",
+      "hyojiJun": 100,
+      "updateVersion": 1,
+      "shosaiList": [
+        {
+          "sankashaKubun": 1,
+          "aitesakiKaishaName": "HBLAB株式会社",
+          "aitesakiSankashaName": "経費 太郎",
+          "hyojiJun": 1
+        },
+        {
+          "sankashaKubun": 2,
+          "jishaSankashaJugyoinId": "TM00700001202401010900xxAB",
+          "hyojiJun": 2
+        }
+      ]
+    }
+  },
+  {
+    "name": "edge_same_name",
+    "description": "Giữ nguyên tên cũ (chỉ đổi shosai). Unique check skip-self → không báo trùng.",
+    "path_param": { "id": "TM06500001202401010900xxZZ" },
+    "body": {
+      "sankashaTemplateName": "○○社用",
+      "sankaNinzu": 2,
+      "memo": null,
+      "hyojiJun": 100,
+      "updateVersion": 2,
+      "shosaiList": [
+        { "sankashaKubun": 2, "jishaSankashaJugyoinId": "TM00700001202401010900xxAB", "hyojiJun": 1 },
+        { "sankashaKubun": 2, "jishaSankashaJugyoinId": "TM00700001202401010900xxCD", "hyojiJun": 2 }
+      ]
+    }
+  },
+  {
+    "name": "edge_replace_shrink",
+    "description": "Template cũ có 5 shosai, update gửi 1 shosai → sau update chỉ còn 1 (replace-all, không merge).",
+    "path_param": { "id": "TM06500001202401010900xxZZ" },
+    "body": {
+      "sankashaTemplateName": "縮小テンプレート",
+      "sankaNinzu": 1,
+      "memo": null,
+      "hyojiJun": 50,
+      "updateVersion": 3,
+      "shosaiList": [
+        { "sankashaKubun": 1, "aitesakiKaishaName": "取引先A", "aitesakiSankashaName": "担当 一郎", "hyojiJun": 1 }
+      ]
+    }
+  },
+  {
+    "name": "edge_shosai_id_ignored",
+    "description": "Client cố gửi sankashaTemplateShosaiId cũ → backend BỎ QUA, xoá hết shosai cũ và sinh ID mới.",
+    "path_param": { "id": "TM06500001202401010900xxZZ" },
+    "body": {
+      "sankashaTemplateName": "ID無視テンプレート",
+      "sankaNinzu": 1,
+      "updateVersion": 4,
+      "shosaiList": [
+        {
+          "sankashaTemplateShosaiId": "TM06600001202401010900oldAA",
+          "sankashaKubun": 2,
+          "jishaSankashaJugyoinId": "TM00700001202401010900xxAB",
+          "hyojiJun": 1
+        }
+      ]
+    }
+  },
+  {
+    "name": "validation_error_version_conflict",
+    "description": "updateVersion lệch version DB (record đã bị request khác sửa lên version 2). Kỳ vọng conflict.",
+    "path_param": { "id": "TM06500001202401010900xxZZ" },
+    "body": {
+      "sankashaTemplateName": "競合テンプレート",
+      "sankaNinzu": 2,
+      "updateVersion": 1,
+      "shosaiList": [
+        { "sankashaKubun": 2, "jishaSankashaJugyoinId": "TM00700001202401010900xxAB", "hyojiJun": 1 }
+      ]
+    }
+  },
+  {
+    "name": "validation_error_version_null",
+    "description": "Thiếu updateVersion → 400 (@NotNull).",
+    "path_param": { "id": "TM06500001202401010900xxZZ" },
+    "body": {
+      "sankashaTemplateName": "バージョン無しテンプレート",
+      "sankaNinzu": 2,
+      "shosaiList": [
+        { "sankashaKubun": 2, "jishaSankashaJugyoinId": "TM00700001202401010900xxAB", "hyojiJun": 1 }
+      ]
+    }
+  },
+  {
+    "name": "validation_error_invalid_employee",
+    "description": "shosai kubun=2 trỏ employee đã bị xoá / role NO_RIGHT (invalid tồn dư §4.8). Update PHẢI chặn.",
+    "path_param": { "id": "TM06500001202401010900xxZZ" },
+    "body": {
+      "sankashaTemplateName": "無効社員テンプレート",
+      "sankaNinzu": 1,
+      "updateVersion": 1,
+      "shosaiList": [
+        { "sankashaKubun": 2, "jishaSankashaJugyoinId": "TM00700001202401010900xxNG", "hyojiJun": 1 }
+      ]
+    }
+  }
+]
