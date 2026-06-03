@@ -1,7 +1,7 @@
 ---
-version: 1.1.0
+version: 1.1.1
 status: draft
-last_updated: 2026-06-01
+last_updated: 2026-06-03
 related_spec: ./spec_analysis.md
 related_spec_version: 1.1.0
 changelog_file: ./CHANGELOG.md
@@ -358,11 +358,15 @@ Nghĩa là không có khái niệm "shared template" giữa các user trong cùn
 **Câu hỏi**:
 Unique scope là `(hojin_code, jugyoin_id, sankasha_template_name, delete_flag)`? Nghĩa là user A và user B có thể cùng đặt tên `○○社用`?
 
-**Trả lời**: Đúng. Unique scope = `(hojin_code, jugyoin_id, sankasha_template_name, delete_flag)`. User A và user B trong cùng `hojin_code` có thể cùng đặt tên template `○○社用` mà không bị conflict.
+**Trả lời**: Đúng về intent — uniqueness chỉ áp dụng cho template **đang sử dụng** (active) của từng owner: cùng 1 user không được trùng tên ở bản active; user A và user B trong cùng `hojin_code` có thể cùng đặt tên `○○社用`; xóa rồi tạo lại cùng tên vẫn OK.
+
+> ⚠️ **Hiệu chỉnh implementation (2026-06-03)**: cách hiện thực ban đầu — unique index 4 cột `(hojin_code, jugyoin_id, sankasha_template_name, delete_flag)` — **sai**. Vì `delete_flag` nằm trong key, nó chỉ cho phép tồn tại đúng 1 bản ghi đã xóa (`delete_flag=1`) trùng tên → khi xóa bản active thứ 2 trùng tên với một bản đã xóa trước đó sẽ vi phạm unique (`SQLState 23505`). Sửa thành **partial unique index** chỉ trên 3 cột nghiệp vụ, có điều kiện `WHERE delete_flag = 0`. Intent ở trên không đổi; chỉ sửa cách enforce ở DB.
 
 **Người trả lời**: Lead BE (DucNA1)
-**Ngày trả lời**: 2026-06-01
-**Impact**: Liquibase changeset tạo unique index với đúng scope này. API create check E040 với điều kiện `WHERE hojin_code = ? AND jugyoin_id = ? AND name = ? AND delete_flag = 0`.
+**Ngày trả lời**: 2026-06-01 (hiệu chỉnh implementation: 2026-06-03)
+**Impact**:
+- Liquibase: **partial unique index** `tm_sankasha_template_unique_key ON (hojin_code, jugyoin_id, sankasha_template_name) WHERE delete_flag = 0` (changeset `20260605_tm_sankasha_template_partial_unique_index` thay cho index 4 cột cũ).
+- API create/update check E040 với điều kiện `WHERE hojin_code = ? AND jugyoin_id = ? AND name = ? AND delete_flag = 0` — đã khớp với partial index, không cần đổi service.
 
 ## Sign-off
 

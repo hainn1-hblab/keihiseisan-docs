@@ -1,9 +1,9 @@
 ---
-version: 1.3.0
+version: 1.3.1
 status: ready-for-implementation
 last_updated: 2026-06-03
 based_on_spec_analysis_version: 1.0.0
-based_on_clarifications_version: 1.1.0
+based_on_clarifications_version: 1.1.1
 unresolved_questions_count: 0
 ---
 
@@ -83,7 +83,7 @@ Layout & UI behavior: xem mockup `images/image_A10.png`.
 
 | # | Label JP | Tiếng Việt | Kiểu UI | Required | Default | Validation / Rule | DB column |
 |---|---|---|---|---|---|---|---|
-| F1 | 参加者テンプレート名 | Tên template | Text input | **✓ Required** | (trống) | Max 250 ký tự; **unique** trong scope `(hojin_code, jugyoin_id, sankasha_template_name, delete_flag)` — unique theo từng owner (xem 4.7) | `sankasha_template_name` (varchar 250) |
+| F1 | 参加者テンプレート名 | Tên template | Text input | **✓ Required** | (trống) | Max 250 ký tự; **unique theo từng owner** giữa các template đang sử dụng (`delete_flag = 0`) trong scope `(hojin_code, jugyoin_id, sankasha_template_name)` — xem 4.7 | `sankasha_template_name` (varchar 250) |
 | F2 | 参加人数 | Số người tham gia | Number input | — | `0` | Cho phép `0`. Khi nhập **> 0** → bắt buộc nằm trong **[1, 999]**. Khi = 0 hoặc bỏ trống → coi như không nhập, **không** chạy validation max | `sanka_ninzu` (numeric 3) |
 | F3 | 他社参加会社名 | Tên công ty bên ngoài | Text input | Tuỳ setting | (trống) | Max 250 ký tự. **Chỉ hiện** khi setting "hiển thị trường nhập người tham gia bên ngoài" của loại chi phí (`tm_keihi_kamoku`) đang BẬT — xem 4.2 | `aitesaki_kaisha_name` (varchar 250) |
 | F3b | (không có label) | Tên người tham gia bên ngoài | Text input | Tuỳ setting | (trống) | Max 250 ký tự. **Placeholder**: "Tên người tham gia bên ngoài". Đi kèm cặp với F3, cùng visibility | `aitesaki_sankasha_name` (varchar 250) |
@@ -149,7 +149,8 @@ Theo wireframe `images/image_A10.png`:
 ### 4.1 Validation rules
 
 - **F1 `sankasha_template_name`** — required, không trống, max 250.
-- **F1 Unique** — không cho phép insert/update tạo ra cặp `(hojin_code, jugyoin_id, sankasha_template_name, delete_flag)` đã tồn tại. Trên DB có **unique constraint** đảm bảo điều này; service phải check trước khi save để trả lỗi nghiệp vụ rõ ràng (error code `E040`).
+- **F1 Unique** — không cho phép tồn tại 2 template **đang sử dụng** (`delete_flag = 0`) trùng `(hojin_code, jugyoin_id, sankasha_template_name)`. Trên DB dùng **partial unique index** `WHERE delete_flag = 0` đảm bảo điều này; service vẫn check trước khi save để trả lỗi nghiệp vụ rõ ràng (error code `E040`, điều kiện `delete_flag = 0`).
+  - ⚠️ **KHÔNG đưa `delete_flag` vào key của unique index.** Nếu đưa vào (index 4 cột) sẽ chỉ cho phép đúng 1 bản đã xóa trùng tên → xóa bản active thứ 2 trùng tên với một bản đã xóa trước đó sẽ vi phạm unique (`SQLState 23505`). Partial index loại bỏ bản đã xóa khỏi phạm vi uniqueness nên xóa bao nhiêu bản trùng tên cũng không lỗi. (Xem clarification #6.18, hiệu chỉnh 2026-06-03.)
 - **F2 `sanka_ninzu`** — cho phép `0` (không nhập). Nếu > 0 → phải `<= 999`. Nếu < 0 → invalid.
 - **F3/F3b** — max 250. Validate **chỉ khi** visibility được bật.
 - **F4 / F6** — UI enforce **max 100**; backend cũng check để defend (trả 400 nếu vượt). Đếm **riêng từng kubun**: external ≤ 100 **và** internal ≤ 100.
@@ -233,7 +234,7 @@ Khi một nhân viên đã được lưu trong template (`tm_sankasha_template_s
 
 **Tên hiển thị**: Participant Template
 **Schema dự kiến**: `keihi_com` (theo convention master `tm_*`)
-**Unique constraint**: `(hojin_code, jugyoin_id, sankasha_template_name, delete_flag)` — đã CONFIRM theo clarification #6.18 (Liquibase tạo unique index đúng scope này).
+**Unique constraint**: **partial unique index** `(hojin_code, jugyoin_id, sankasha_template_name) WHERE delete_flag = 0` — uniqueness chỉ áp dụng cho template đang sử dụng. Đã CONFIRM theo clarification #6.18 (hiệu chỉnh 2026-06-03: chuyển từ index 4 cột gồm `delete_flag` sang partial index để fix lỗi `SQLState 23505` khi xóa template trùng tên với bản đã xóa). Changeset: `20260605_tm_sankasha_template_partial_unique_index`.
 
 > 📌 **Không thêm cột `template_kubun`** (chốt theo #6.16): template tạo từ cả 2 entry point — màn tạo meisai (mọi role) và menu Setting (role 5/6) — đều lưu chung vào bảng này, **không** phân biệt "master" vs "cá nhân" qua bất kỳ cột nào. Data hai loại giống hệt nhau, chỉ khác entry point UI.
 
@@ -373,6 +374,15 @@ Khi một nhân viên đã được lưu trong template (`tm_sankasha_template_s
 ---
 
 ## Version History
+
+### [1.3.1] - 2026-06-03
+
+- **Fix bug unique constraint (`SQLState 23505` khi xóa)** — đồng bộ với code:
+  - Chuyển từ unique index 4 cột `(hojin_code, jugyoin_id, sankasha_template_name, delete_flag)` sang **partial unique index** `(hojin_code, jugyoin_id, sankasha_template_name) WHERE delete_flag = 0` (§3.1 F1, §4.1, §5.1).
+  - Nguyên nhân: index 4 cột chỉ cho phép đúng 1 bản đã xóa (`delete_flag=1`) trùng tên → xóa bản active thứ 2 trùng tên với một bản đã xóa trước đó vi phạm unique.
+  - Changeset mới forward-only `20260605_tm_sankasha_template_partial_unique_index`. Không đổi service (check E040 vốn đã lọc `delete_flag = 0`).
+  - Đồng bộ clarifications #6.18 (v1.1.0 → v1.1.1).
+- Patch bump (sửa cách mô tả/hiện thực, intent uniqueness không đổi).
 
 ### [1.3.0] - 2026-06-03
 

@@ -12,6 +12,12 @@ Format dựa trên [Keep a Changelog](https://keepachangelog.com/), versioning t
 
 ## [Unreleased] - 2026-06-03
 
+### Fixed
+- **Lỗi `SQLState 23505` (duplicate key `tm_sankasha_template_unique_key`) khi xóa template trùng tên với một bản đã xóa trước đó.** Nguyên nhân: unique index gồm cả `delete_flag` → chỉ cho phép đúng 1 bản `delete_flag=1` trùng tên; xóa bản active thứ 2 trùng tên gây vi phạm unique lúc UPDATE.
+  - **Fix DB**: changeset mới forward-only `20260605_tm_sankasha_template_partial_unique_index` — thay index 4 cột bằng **partial unique index** `(hojin_code, jugyoin_id, sankasha_template_name) WHERE delete_flag = 0`. Áp bằng `liquibase:update`, không cần reset DB local.
+  - **Không đổi service** (`checkDuplicateName`/update đã lọc `delete_flag=0`, vốn nhất quán với partial index).
+  - **Docs sync**: `final_spec.md` v1.3.0 → v1.3.1 (§3.1 F1, §4.1, §5.1 + Version History); `clarifications.md` #6.18 v1.1.0 → v1.1.1 (hiệu chỉnh implementation, intent không đổi).
+
 ### Changed (thay đổi nghiệp vụ — PO/Lead chốt, đã sync code + docs, BUILD SUCCESS)
 - **`hyojiJun` cho phép bắt đầu từ 0** (`[0, 9999]`, trước min=1) — header & shosai. Code: `SankashaTemplateDto`/`SankashaTemplateShosaiDto` `@Range(min=0)`.
 - **Max per kubun = 100** (trước 99) — `SankashaTemplateService.MAX_SHOSAI_PER_KUBUN = 100`.
