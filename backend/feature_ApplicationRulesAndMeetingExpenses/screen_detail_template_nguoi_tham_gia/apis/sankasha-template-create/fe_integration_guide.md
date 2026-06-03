@@ -55,8 +55,8 @@ Request gồm **1 header** + **1 mảng `shosaiList`** (danh sách người tham
 | `sankashaTemplateName` | string | ✅ | không rỗng, **tối đa 250 ký tự** | Tên template (参加者テンプレート名) |
 | `sankaNinzu` | integer | ❌ | `0` (= chưa nhập) **hoặc** `1`–`999`. **KHÔNG** chấp nhận số âm / > 999 | Số người tham gia (参加人数) |
 | `memo` | string | ❌ | không giới hạn độ dài | Ghi chú (自社参加者メモ) |
-| `hyojiJun` | integer | ❌ | `1`–`9999`. Bỏ trống → server set `100` | Thứ tự hiển thị (表示順) |
-| `shosaiList` | array | ✅ | **≥ 1 phần tử**. Xem ràng buộc số lượng ở §2.4 | Danh sách người tham gia |
+| `hyojiJun` | integer | ❌ | `0`–`9999` (cho phép 0). Bỏ trống → server set `100` | Thứ tự hiển thị (表示順) |
+| `shosaiList` | array | ❌ | **KHÔNG bắt buộc** — cho phép rỗng (template không có người tham gia). Xem ràng buộc số lượng ở §2.4 | Danh sách người tham gia |
 
 > ❗ **KHÔNG gửi** field `jugyoinId` (chủ sở hữu). Backend tự gán theo user đang đăng nhập từ JWT. Nếu FE có gửi, backend **bỏ qua**.
 > Tương tự KHÔNG cần gửi: `sankashaTemplateId`, `hojinCode`, `deleteFlag`, `updateVersion`, các field `add*/upd*`.
@@ -69,7 +69,7 @@ Request gồm **1 header** + **1 mảng `shosaiList`** (danh sách người tham
 | `aitesakiKaishaName` | string | ⚠️ điều kiện | ≤ 250 ký tự | Tên công ty đối tác. **Bắt buộc khi `kubun=1`**, phải bỏ trống khi `kubun=2` |
 | `aitesakiSankashaName` | string | ⚠️ điều kiện | ≤ 250 ký tự | Tên người tham gia đối tác. **Bắt buộc khi `kubun=1`**, phải bỏ trống khi `kubun=2` |
 | `jishaSankashaJugyoinId` | string | ⚠️ điều kiện | đúng 29 ký tự | ID nhân viên nội bộ. **Bắt buộc khi `kubun=2`**, phải bỏ trống khi `kubun=1` |
-| `hyojiJun` | integer | ❌ | `1`–`9999`. Bỏ trống → server set `1` | Thứ tự trong template |
+| `hyojiJun` | integer | ❌ | `0`–`9999` (cho phép 0). Bỏ trống → server set `1` | Thứ tự trong template |
 
 > `jishaSankashaName` (tên nhân viên) là field **chỉ để hiển thị** — FE không cần gửi khi tạo; backend sẽ trả về ở các API đọc.
 
@@ -77,10 +77,11 @@ Request gồm **1 header** + **1 mảng `shosaiList`** (danh sách người tham
 
 Backend **đếm RIÊNG từng loại kubun**, KHÔNG đếm tổng:
 
-- Số phần tử có `kubun = 1` (external) **≤ 99**
-- Số phần tử có `kubun = 2` (internal) **≤ 99**
+- Số phần tử có `kubun = 1` (external) **≤ 100**
+- Số phần tử có `kubun = 2` (internal) **≤ 100**
+- `shosaiList` cũng **được phép rỗng** (0 phần tử) — template không có người tham gia.
 
-→ Tổng tối đa có thể lên tới **198** (99 + 99) vẫn hợp lệ. FE nên validate theo từng nhóm kubun, **đừng** chặn ở mốc tổng 100.
+→ Tổng tối đa có thể lên tới **200** (100 + 100) vẫn hợp lệ. FE nên validate theo từng nhóm kubun, **đừng** chặn ở mốc tổng.
 
 ### 2.5 Conditional theo `sankashaKubun`
 
@@ -162,10 +163,10 @@ Mọi lỗi đều trả về body dạng `BodyErrorResponse`:
 
 | Tình huống | HTTP | Có `error{}`? | Gợi ý FE |
 |---|---|---|---|
-| Thiếu field bắt buộc (`sankashaTemplateName` rỗng, `shosaiList` rỗng) | 400 | ✅ | Hiển thị inline theo field |
+| Thiếu field bắt buộc (`sankashaTemplateName` rỗng) | 400 | ✅ | Hiển thị inline theo field. **Lưu ý**: `shosaiList` rỗng KHÔNG còn là lỗi |
 | `sankaNinzu` > 999 | 400 | ✅ (`sankaNinzu`) | Inline ở ô số người |
-| `count(kubun=1) > 99` | 400 | ✅ (`shosaiList`) | Banner "他社参加者は最大99件" |
-| `count(kubun=2) > 99` | 400 | ✅ (`shosaiList`) | Banner "自社参加者は最大99件" |
+| `count(kubun=1) > 100` | 400 | ✅ (`shosaiList`) | Banner "他社参加者は最大100件" |
+| `count(kubun=2) > 100` | 400 | ✅ (`shosaiList`) | Banner "自社参加者は最大100件" |
 | Conditional fail (thiếu/thừa field theo kubun, hoặc nhân viên không hợp lệ) | 400 | ✅ (key dạng `shosaiList[i].field`) | Highlight đúng dòng |
 | **Trùng tên template** (của chính user) | 400 | ❌ | Toast `message`: `「○○社用」は既に登録されている参加者テンプレート名です。` |
 | Sai role | 403 | ❌ | Toast quyền truy cập |
@@ -192,9 +193,9 @@ Mọi lỗi đều trả về body dạng `BodyErrorResponse`:
 
 1. `sankashaTemplateName`: không rỗng, ≤ 250 ký tự.
 2. `sankaNinzu`: để trống được; nếu nhập thì là `0` hoặc số nguyên `1`–`999`.
-3. `hyojiJun`: nếu nhập, `1`–`9999`.
-4. `shosaiList`: ≥ 1 dòng.
-5. Đếm riêng: `kubun=1` ≤ 99 dòng **và** `kubun=2` ≤ 99 dòng.
+3. `hyojiJun`: nếu nhập, `0`–`9999` (cho phép 0).
+4. `shosaiList`: **không bắt buộc** (cho phép rỗng).
+5. Đếm riêng: `kubun=1` ≤ 100 dòng **và** `kubun=2` ≤ 100 dòng.
 6. Mỗi dòng:
    - `kubun=1`: bắt buộc `aitesakiKaishaName` + `aitesakiSankashaName` (≤ 250), không gửi `jishaSankashaJugyoinId`.
    - `kubun=2`: bắt buộc `jishaSankashaJugyoinId` (chọn từ picker nhân viên hợp lệ), không gửi 2 field aitesaki.
@@ -216,7 +217,7 @@ export interface SankashaTemplateShosai {
   aitesakiSankashaName?: string;
   /** Bắt buộc khi kubun=2 (29 ký tự) */
   jishaSankashaJugyoinId?: string;
-  /** 1–9999, optional (default 1) */
+  /** 0–9999, optional (default 1) */
   hyojiJun?: number;
 }
 
@@ -225,8 +226,8 @@ export interface CreateSankashaTemplateRequest {
   sankashaTemplateName: string;         // <= 250
   sankaNinzu?: number;                  // 0 hoặc 1–999
   memo?: string;
-  hyojiJun?: number;                    // 1–9999 (default 100)
-  shosaiList: SankashaTemplateShosai[]; // >= 1
+  hyojiJun?: number;                    // 0–9999 (default 100)
+  shosaiList?: SankashaTemplateShosai[]; // optional, cho phép rỗng
 }
 
 /** Response thành công */
@@ -279,7 +280,7 @@ async function createSankashaTemplate(
 - [ ] Gắn header `Authorization: Bearer <token>`.
 - [ ] KHÔNG gửi `jugyoinId` / `hojinCode` / các field hệ thống.
 - [ ] `sankashaTemplateName` không rỗng, ≤ 250.
-- [ ] `shosaiList` ≥ 1 dòng; đếm riêng kubun=1 ≤ 99 và kubun=2 ≤ 99.
+- [ ] `shosaiList` **không bắt buộc** (cho phép rỗng); đếm riêng kubun=1 ≤ 100 và kubun=2 ≤ 100.
 - [ ] Mỗi dòng điền đúng field theo kubun (xem §2.5).
 - [ ] `kubun=2` chọn nhân viên từ picker hợp lệ (không nhập tay).
 - [ ] Xử lý 200 (success toast) + 400 (map `error{}` inline) + 403/401/500.

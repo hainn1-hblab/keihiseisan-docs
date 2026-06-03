@@ -43,9 +43,9 @@
     }
   },
   {
-    "name": "error_external_over_99",
+    "name": "error_external_over_100",
     "http_status": 400,
-    "description": "count(kubun=1) > 99. Đếm riêng external, KHÔNG đếm tổng.",
+    "description": "count(kubun=1) > 100. Đếm riêng external, KHÔNG đếm tổng.",
     "body": {
       "code": 1,
       "type": "bad_request",
@@ -54,14 +54,14 @@
       "path": "/api/v1/sankasha-template",
       "timestamp": "2026-06-05 10:00:00",
       "error": {
-        "shosaiList": "他社参加者は最大99件まで登録できます。"
+        "shosaiList": "他社参加者は最大100件まで登録できます。"
       }
     }
   },
   {
-    "name": "error_internal_over_99",
+    "name": "error_internal_over_100",
     "http_status": 400,
-    "description": "count(kubun=2) > 99. Đếm riêng internal.",
+    "description": "count(kubun=2) > 100. Đếm riêng internal.",
     "body": {
       "code": 1,
       "type": "bad_request",
@@ -70,7 +70,7 @@
       "path": "/api/v1/sankasha-template",
       "timestamp": "2026-06-05 10:00:00",
       "error": {
-        "shosaiList": "自社参加者は最大99件まで登録できます。"
+        "shosaiList": "自社参加者は最大100件まで登録できます。"
       }
     }
   },

@@ -10,9 +10,23 @@ Format dựa trên [Keep a Changelog](https://keepachangelog.com/), versioning t
 
 ---
 
-## [Unreleased] - 2026-06-02
+## [Unreleased] - 2026-06-03
 
-### Added
+### Changed (thay đổi nghiệp vụ — PO/Lead chốt, đã sync code + docs, BUILD SUCCESS)
+- **`hyojiJun` cho phép bắt đầu từ 0** (`[0, 9999]`, trước min=1) — header & shosai. Code: `SankashaTemplateDto`/`SankashaTemplateShosaiDto` `@Range(min=0)`.
+- **Max per kubun = 100** (trước 99) — `SankashaTemplateService.MAX_SHOSAI_PER_KUBUN = 100`.
+- **`shosaiList` KHÔNG bắt buộc** (cho phép rỗng/null) — bỏ `@NotEmpty` ở DTO; service normalize null → empty list ở `add`/`update`.
+- Bump: `final_spec.md` → v1.3.0; `create/detail_design` → v1.1.0; `update/detail_design` → v1.1.0. Cập nhật `fe_integration_guide.md` + example JSON (create).
+
+
+
+- **ĐÃ IMPLEMENT (BUILD SUCCESS)** 3 API: get-by-id, delete, bulk-delete (cùng với update + search trước đó → **toàn bộ 6 API đã có code**).
+  - **get-by-id** (`GET /sankasha-template/{id}`): reuse `read` + `findShosaiByTemplateIds` + `enrichShosaiList`; trả `SankashaTemplate` (header + shosai enrich). detail_design → v1.2.0 `implemented`.
+  - **delete** (`DELETE /sankasha-template/{id}`): soft delete header, optimistic lock, I003. detail_design → v1.1.0 `implemented`.
+  - **bulk-delete** (`DELETE /sankasha-template`): atomic rollback (`@Transactional` lặp `deleteOne`), I006; list rỗng → no-op. detail_design → v1.1.0 `implemented`.
+  - Refactor `deleteOne(dto)` dùng chung delete + bulk-delete. Thêm endpoint GET/DELETE/DELETE vào Api/Delegate/DelegateImpl + openapi.yml. Không thêm DB layer mới (reuse `read`/`save`/`findShosaiByTemplateIds`).
+- `apis/sankasha-template-delete/detail_design.md` v1.0.0 — detail design API delete 1 record (`DELETE /sankasha-template/{id}`), kèm examples. Soft delete owner-scoped (`delete_flag=1`), optimistic lock, không đụng shosai, message I003. Reuse hạ tầng `read`/`save` từ update. 3 TBD (1 Medium #D2, 2 Low).
+- `apis/sankasha-template-bulk-delete/detail_design.md` v1.0.0 — detail design API bulk delete (`DELETE /sankasha-template`), kèm examples. Lặp logic xoá đơn trong 1 `@Transactional` (atomic rollback), owner-scoped, message I006. Reuse `List<SankashaTemplate>` model. 4 TBD (2 Medium #BD3/#D2, 2 Low).
 - `apis/sankasha-template-search/detail_design.md` v1.0.0 — detail design API search (`POST /sankasha-template/search`), kèm `request_examples.json` + `response_examples.json`. Owner-scoped filter cố định `jugyoin_id`; search xuyên bảng con `shosai` qua EXISTS subquery (S2 kubun=1 OR 2 cột, S3 kubun=2 join jugyoin); aggregate shosai per template để hiển thị multi-line (cột 5/6); enrich `jishaSankashaName` batch (tránh N+1); default size 50 + sort hyoji_jun ASC. DTO mới: `SankashaTemplateSearchParamDto`; API model mới: `SankashaTemplateSearchParameter`. → v1.1.0: **resolve #S1** — chốt trả nguyên `shosaiList` per template. → **v1.2.0: ĐÃ IMPLEMENT (BUILD SUCCESS)** — response dùng `ListResponse<SankashaTemplate>` generic (#S6, không tạo `ListSankashaTemplate`); enrich tên qua `getShimei()`; default size 50 (#S5). Code: thêm method `search`+`enrichShosaiList` vào Service, `search`+`findShosaiByTemplateIds` vào Crud/Adapter, `@Query` EXISTS subquery vào repository, endpoint vào Api/Delegate; field response additive vào API model `SankashaTemplate`/`SankashaTemplateShosai` + `SankashaTemplateShosaiDto.jishaSankashaInvalid`; openapi.yml.
 - `apis/sankasha-template-get-by-id/detail_design.md` v1.0.0 → v1.1.0 — detail design API get-by-id (`GET /sankasha-template/{id}`), kèm `request_examples.json` + `response_examples.json`. Read owner-scoped → 404, enrich `jishaSankashaName` (batch query), đánh dấu dòng invalid (§4.8) — logic ngược create/update (giữ & hiển thị thay vì chặn).
 - `apis/sankasha-template-update/detail_design.md` v1.0.0 — detail design API update (`PUT /sankasha-template/{id}`), kèm `request_examples.json` + `response_examples.json`.

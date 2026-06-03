@@ -1,0 +1,34 @@
+{
+  "happy_case": {
+    "description": "Xoá 3 template của chính user (version khớp)",
+    "body": [
+      { "sankashaTemplateId": "TM06500001202601010900xxAB", "updateVersion": 1 },
+      { "sankashaTemplateId": "TM06500001202601010900xxCD", "updateVersion": 2 },
+      { "sankashaTemplateId": "TM06500001202601010900xxEF", "updateVersion": 1 }
+    ]
+  },
+  "single_element": {
+    "description": "List 1 phần tử (vẫn dùng bulk endpoint)",
+    "body": [
+      { "sankashaTemplateId": "TM06500001202601010900xxAB", "updateVersion": 1 }
+    ]
+  },
+  "one_not_owner_rollback": {
+    "description": "1 phần tử thuộc user khác → 404, rollback toàn bộ",
+    "body": [
+      { "sankashaTemplateId": "TM06500001202601010900xxAB", "updateVersion": 1 },
+      { "sankashaTemplateId": "TM06500001202601010900yyZZ", "updateVersion": 1 }
+    ]
+  },
+  "one_version_conflict_rollback": {
+    "description": "1 phần tử sai version → conflict, rollback toàn bộ",
+    "body": [
+      { "sankashaTemplateId": "TM06500001202601010900xxAB", "updateVersion": 1 },
+      { "sankashaTemplateId": "TM06500001202601010900xxCD", "updateVersion": 0 }
+    ]
+  },
+  "empty_list": {
+    "description": "List rỗng → theo #BD2 (no-op I006 hoặc 400)",
+    "body": []
+  }
+}

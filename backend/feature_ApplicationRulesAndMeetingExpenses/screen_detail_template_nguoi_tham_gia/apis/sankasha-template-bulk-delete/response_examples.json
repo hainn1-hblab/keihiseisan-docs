@@ -1,0 +1,35 @@
+{
+  "success": {
+    "description": "HTTP 200 — bulk soft delete thành công (I006)",
+    "httpStatus": 200,
+    "body": {
+      "code": 0,
+      "message": "削除が完了しました。",
+      "type": "success"
+    }
+  },
+  "error_not_found_rollback": {
+    "description": "HTTP 404 — 1 phần tử không tồn tại/không thuộc owner → rollback toàn bộ (E041)",
+    "httpStatus": 404,
+    "body": {
+      "code": 4,
+      "type": "not_found",
+      "message": "指定された参加者テンプレートIDは存在しません。",
+      "status": 404,
+      "path": "/api/v1/sankasha-template",
+      "timestamp": "2026-06-03 12:00:00"
+    }
+  },
+  "error_forbidden": {
+    "description": "HTTP 403 — role không hợp lệ",
+    "httpStatus": 403,
+    "body": {
+      "code": 3,
+      "type": "forbidden",
+      "message": "権限がありません。",
+      "status": 403,
+      "path": "/api/v1/sankasha-template",
+      "timestamp": "2026-06-03 12:00:00"
+    }
+  }
+}

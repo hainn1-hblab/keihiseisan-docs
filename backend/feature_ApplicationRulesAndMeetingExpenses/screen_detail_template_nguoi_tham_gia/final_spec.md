@@ -1,7 +1,7 @@
 ---
-version: 1.2.1
+version: 1.3.0
 status: ready-for-implementation
-last_updated: 2026-06-05
+last_updated: 2026-06-03
 based_on_spec_analysis_version: 1.0.0
 based_on_clarifications_version: 1.1.0
 unresolved_questions_count: 0
@@ -87,11 +87,11 @@ Layout & UI behavior: xem mockup `images/image_A10.png`.
 | F2 | 参加人数 | Số người tham gia | Number input | — | `0` | Cho phép `0`. Khi nhập **> 0** → bắt buộc nằm trong **[1, 999]**. Khi = 0 hoặc bỏ trống → coi như không nhập, **không** chạy validation max | `sanka_ninzu` (numeric 3) |
 | F3 | 他社参加会社名 | Tên công ty bên ngoài | Text input | Tuỳ setting | (trống) | Max 250 ký tự. **Chỉ hiện** khi setting "hiển thị trường nhập người tham gia bên ngoài" của loại chi phí (`tm_keihi_kamoku`) đang BẬT — xem 4.2 | `aitesaki_kaisha_name` (varchar 250) |
 | F3b | (không có label) | Tên người tham gia bên ngoài | Text input | Tuỳ setting | (trống) | Max 250 ký tự. **Placeholder**: "Tên người tham gia bên ngoài". Đi kèm cặp với F3, cùng visibility | `aitesaki_sankasha_name` (varchar 250) |
-| F4 | `+` | Nút cộng cho cặp (F3, F3b) | Button | — | — | Thêm cặp input mới. **Max 99 cặp**. Đạt giới hạn → disable nút | — |
+| F4 | `+` | Nút cộng cho cặp (F3, F3b) | Button | — | — | Thêm cặp input mới. **Max 100 cặp**. Đạt giới hạn → disable nút | — |
 | F5 | 自社参加者 | Người tham gia thuộc công ty | Dropdown (chỉ tên nhân viên) | — | (trống) | Danh sách = tất cả `tm_jugyoin` của `hojin_code` hiện tại, **không filter theo phòng ban** của user lập đơn, **trừ** những nhân viên có `Roles.NO_RIGHT` (value = 1) — xem 4.3 | `jisha_sankasha_jugyoin_id` (FK → `tm_jugyoin`) |
-| F6 | `+` | Nút cộng cho F5 | Button | — | — | Thêm 1 dropdown mới. **Max 99 dòng**. Đạt giới hạn → disable nút | — |
+| F6 | `+` | Nút cộng cho F5 | Button | — | — | Thêm 1 dropdown mới. **Max 100 dòng**. Đạt giới hạn → disable nút | — |
 | F7 | 自社参加者メモ | Memo template | Text input | — | (trống) | Kiểu `text` (không giới hạn ký tự cứng ở DB). ⚠️ **TBD** việc cho xuống dòng (xem section 7) | `tm_sankasha_template.memo` (text) |
-| F8 | 表示順 | Số thứ tự hiển thị | Number input | — | `100` | Numeric 4 chữ số. Áp default `100` theo convention dự án | `hyoji_jun` (numeric 4) |
+| F8 | 表示順 | Số thứ tự hiển thị | Number input | — | `100` | Numeric 4 chữ số, **cho phép từ 0** (`0 ≤ x ≤ 9999`). Áp default `100` theo convention dự án | `hyoji_jun` (numeric 4) |
 
 ### 3.2 Action buttons
 
@@ -152,9 +152,10 @@ Theo wireframe `images/image_A10.png`:
 - **F1 Unique** — không cho phép insert/update tạo ra cặp `(hojin_code, jugyoin_id, sankasha_template_name, delete_flag)` đã tồn tại. Trên DB có **unique constraint** đảm bảo điều này; service phải check trước khi save để trả lỗi nghiệp vụ rõ ràng (error code `E040`).
 - **F2 `sanka_ninzu`** — cho phép `0` (không nhập). Nếu > 0 → phải `<= 999`. Nếu < 0 → invalid.
 - **F3/F3b** — max 250. Validate **chỉ khi** visibility được bật.
-- **F4 / F6** — UI enforce max 99; backend cũng check để defend (trả 400 nếu vượt).
+- **F4 / F6** — UI enforce **max 100**; backend cũng check để defend (trả 400 nếu vượt). Đếm **riêng từng kubun**: external ≤ 100 **và** internal ≤ 100.
 - **F5 `jisha_sankasha_jugyoin_id`** — phải là employee tồn tại trong `tm_jugyoin` cùng `hojin_code`, `delete_flag = 0`, và `role != NO_RIGHT (1)` — xem 4.3.
-- **F8 `hyoji_jun`** — numeric 4 (≤ 9999), default 100.
+- **F8 `hyoji_jun`** — numeric 4 (**0 ≤ x ≤ 9999**, cho phép bắt đầu từ 0), default 100.
+- **Danh sách người tham gia (`shosaiList`)** — **KHÔNG bắt buộc**: cho phép lưu template **không có** người tham gia nào (list rỗng hợp lệ). Backend nhận `shosaiList` rỗng/null → coi như không có dòng nào.
 
 ### 4.2 Field visibility — dependency với Setting detail mục chi phí
 
@@ -372,6 +373,14 @@ Khi một nhân viên đã được lưu trong template (`tm_sankasha_template_s
 ---
 
 ## Version History
+
+### [1.3.0] - 2026-06-03
+
+- **Thay đổi nghiệp vụ (PO/Lead chốt)** — cập nhật 3 rule, đã đồng bộ code + detail_design:
+  - **F8 `hyoji_jun`**: cho phép bắt đầu từ **0** (`0 ≤ x ≤ 9999`), trước đây min = 1. Áp cho cả header và shosai (§3.1 F8, §4.1).
+  - **F4/F6 max per kubun = 100** (trước 99): external ≤ 100 **và** internal ≤ 100 (§3.1, §4.1).
+  - **`shosaiList` KHÔNG bắt buộc**: cho phép lưu template không có người tham gia (list rỗng hợp lệ) — bỏ ràng buộc bắt buộc nhập (§4.1).
+- Minor bump (đổi behaviour/validation, không đổi schema DB).
 
 ### [1.2.1] - 2026-06-02
 

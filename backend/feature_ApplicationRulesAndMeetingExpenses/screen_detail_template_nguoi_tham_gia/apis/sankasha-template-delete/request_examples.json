@@ -1,0 +1,22 @@
+{
+  "happy_case": {
+    "description": "Xoá template của chính user (updateVersion khớp DB)",
+    "pathParam": { "id": "TM06500001202601010900xxAB" },
+    "body": { "updateVersion": 1 }
+  },
+  "version_conflict": {
+    "description": "updateVersion lệch version DB → conflict",
+    "pathParam": { "id": "TM06500001202601010900xxAB" },
+    "body": { "updateVersion": 0 }
+  },
+  "missing_version": {
+    "description": "Thiếu updateVersion → 400 (E005)",
+    "pathParam": { "id": "TM06500001202601010900xxAB" },
+    "body": {}
+  },
+  "not_found_other_owner": {
+    "description": "id của template user khác → 404",
+    "pathParam": { "id": "TM06500001202601010900yyZZ" },
+    "body": { "updateVersion": 1 }
+  }
+}

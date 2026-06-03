@@ -1,6 +1,6 @@
 ---
-version: 1.0.0
-status: draft
+version: 1.1.0
+status: implemented
 api_name: SankashaTemplateUpdate
 http_method: PUT
 endpoint: /api/v1/sankasha-template/{id}
@@ -64,9 +64,9 @@ Authorization: Bearer <JWT access token (Keycloak, bearer-only)>
 | `sankashaTemplateName` | string | ✅ | `@NotBlank`, `@Size(max=250)` | Tên template (参加者テンプレート名) | `sankasha_template_name` |
 | `sankaNinzu` | integer | ❌ | nullable; nếu != null và != 0 → range `[1, 999]` | Số người tham gia (参加人数). Cho phép `0` | `sanka_ninzu` |
 | `memo` | string | ❌ | không giới hạn length cứng (DB type `text`) | Memo (自社参加者メモ) | `memo` |
-| `hyojiJun` | integer | ❌ | range `[1, 9999]`; default `100` nếu không truyền | Thứ tự hiển thị (表示順) | `hyoji_jun` |
+| `hyojiJun` | integer | ❌ | range `[0, 9999]` (cho phép 0); default `100` nếu không truyền | Thứ tự hiển thị (表示順) | `hyoji_jun` |
 | `updateVersion` | integer | ✅ 🆕 | `@NotNull` | **Optimistic lock** — version client đang giữ. Phải khớp version DB hiện tại, không thì 409/conflict (xem §4.5) | `update_version` (`@Version`) |
-| `shosaiList` | array<SankashaTemplateShosai> | ✅ | `@NotEmpty`; ràng buộc count theo kubun (§4.2 create) | Danh sách người tham gia **MỚI** — thay thế toàn bộ list cũ (§4.6) | → `tm_sankasha_template_shosai` |
+| `shosaiList` | array<SankashaTemplateShosai> | ❌ | **KHÔNG bắt buộc** (cho phép rỗng/null); ràng buộc count theo kubun khi có (§4.2 create) | Danh sách người tham gia **MỚI** — thay thế toàn bộ list cũ (§4.6). Rỗng → xoá hết shosai cũ, không insert dòng nào | → `tm_sankasha_template_shosai` |
 
 **Detail level** (`SankashaTemplateShosai`): **giống hệt create** — xem [create §2.2](../sankasha-template-create/detail_design.md#22-request-body-schema).
 
@@ -119,7 +119,7 @@ Xem file [`request_examples.json`](./request_examples.json) — phần tử `hap
 | 400 | `BadRequestException` | (error map từ `BeanUtil.getAllValidationMessageMap`) | Bean validation fail: `sankashaTemplateName` rỗng/quá 250; `shosaiList` rỗng; `sankashaKubun` null/ngoài {1,2}; 🆕 `updateVersion` null | field-level errors trong `error{}` |
 | 400 | `BadRequestException` | `E005` (param: fieldName) | Thiếu field bắt buộc theo kubun (conditional, create §4.3) | Có thể gộp vào error map |
 | 400 | `BadRequestException` | (msg `参加人数` range) ⚠️ key TBD | `sankaNinzu` > 999 (khi > 0) | xem create §9 TBD #C2 |
-| 400 | `BadRequestException` | (msg max 99) ⚠️ key TBD | `count(kubun=1) > 99` HOẶC `count(kubun=2) > 99` | Đếm riêng từng kubun |
+| 400 | `BadRequestException` | (msg max 100) ⚠️ key TBD | `count(kubun=1) > 100` HOẶC `count(kubun=2) > 100` | Đếm riêng từng kubun |
 | 400 | `BadRequestException` | (msg invalid employee) ⚠️ key TBD | 🆕 **DIFF**: kubun=2 có `jishaSankashaJugyoinId` không tồn tại / `delete_flag=1` / role = `NO_RIGHT` — **bắt buộc chặn ở update** (final_spec §4.8) | §4.4 |
 | 400 | `BadRequestException` | `E040` (param: name, fieldName) | 🆕 **DIFF**: Trùng tên template trong scope owner — **nhưng bỏ qua nếu trùng với chính row đang update** (§4.3) | 400, KHÔNG 409 |
 | 404 | `NotFoundException` | `E041` (param: id, fieldName) | 🆕 **DIFF**: `id` không tồn tại, đã xoá (`delete_flag=1`), hoặc **không thuộc owner** (template của user khác) | Read owner-scoped trả null |
@@ -148,7 +148,7 @@ SankashaTemplateApiController.updateSankashaTemplate(id, SankashaTemplate)
                     2. ★ read owner-scoped: crud.read(hojinCode, id, loginJugyoinId, delete_flag=0)
                        → NotFoundException (E041/404) nếu null               ★ DIFF
                     3. validate(dto) — Bean Validation (header + updateVersion + từng shosai) → 400
-                    4. validate business: count kubun=1 ≤ 99, count kubun=2 ≤ 99, kubun ∈ {1,2}
+                    4. validate business: count kubun=1 ≤ 100, count kubun=2 ≤ 100, kubun ∈ {1,2} (shosaiList rỗng → bỏ qua)
                     5. validate conditional theo kubun (create §4.3),
                        với kubun=2: kiểm tra employee hợp lệ (final_spec §4.8 — bắt buộc)  ★ DIFF
                     6. ★ checkUnique bỏ qua chính mình:
@@ -188,11 +188,13 @@ SankashaTemplateApiController.updateSankashaTemplate(id, SankashaTemplate)
 
 **Cấp field (Bean Validation)** — giống create, **thêm**:
 - 🆕 `updateVersion`: `@NotNull`.
+- `hyojiJun`: range `[0, 9999]` (cho phép 0).
+- `shosaiList`: **KHÔNG bắt buộc** (bỏ `@NotEmpty`) — cho phép rỗng/null.
 
-Phần còn lại (`sankashaTemplateName`, `sankaNinzu`, `hyojiJun`, `memo`, `shosaiList`, `sankashaKubun`) — **giống hệt create** (xem [create §4.2](../sankasha-template-create/detail_design.md#42-validation-chi-tiết)).
+Phần còn lại (`sankashaTemplateName`, `sankaNinzu`, `memo`, `sankashaKubun`) — **giống hệt create** (xem [create §4.2](../sankasha-template-create/detail_design.md#42-validation-chi-tiết)).
 
 **Cấp business (Service layer)** — giống create:
-- Đếm riêng theo kubun: `count(kubun==1) ≤ 99` **VÀ** `count(kubun==2) ≤ 99` (KHÔNG check tổng 198).
+- Đếm riêng theo kubun: `count(kubun==1) ≤ 100` **VÀ** `count(kubun==2) ≤ 100` (KHÔNG check tổng 200). `shosaiList` rỗng → count = 0 → hợp lệ.
 - `sankashaKubun` ∈ `{1, 2}`.
 - Conditional theo kubun (create §4.3).
 - Unique name (§4.3 dưới — **có khác biệt**).
@@ -391,14 +393,14 @@ Thêm **path** vào `api_interface_generate_tool/specification/openapi.yml`:
 | 10 | Đổi tên trùng template của **user khác** cùng hojin | Success (owner-scoped unique) |
 | 11 | `sankaNinzu = 1000` | 400 (range) |
 | 12 | `sankaNinzu = 0` / null | Success |
-| 13 | `shosaiList` rỗng | 400 (`@NotEmpty`) |
+| 13 | `shosaiList` rỗng / null | **Success** — xoá hết shosai cũ, không insert dòng mới |
 | 14 | shosai kubun=1 thiếu `aitesakiKaishaName` | 400 (conditional) |
 | 15 | shosai kubun=2 thiếu `jishaSankashaJugyoinId` | 400 (conditional) |
 | 16 | 🆕 shosai kubun=2 trỏ employee `delete_flag=1` (invalid tồn dư §4.8) | 400 (invalid employee — bắt buộc chặn ở update) |
 | 17 | 🆕 shosai kubun=2 trỏ employee role=`NO_RIGHT` | 400 (invalid employee) |
-| 18 | 100 phần tử kubun=1 (vượt 99) | 400 (max external) |
-| 19 | 100 phần tử kubun=2 (vượt 99) | 400 (max internal) |
-| 20 | 99 ext + 99 int = 198 | Success (đúng max mỗi kubun) |
+| 18 | 101 phần tử kubun=1 (vượt 100) | 400 (max external) |
+| 19 | 101 phần tử kubun=2 (vượt 100) | 400 (max internal) |
+| 20 | 100 ext + 100 int = 200 | Success (đúng max mỗi kubun) |
 | 21 | Role gọi API = `REGISTRATION` (3) | 403 |
 | 22 | 🆕 body gửi `jugyoinId` khác → verify owner KHÔNG đổi | DB giữ owner gốc |
 | 23 | 🆕 body gửi `sankashaTemplateShosaiId` cũ → verify bị bỏ qua, sinh ID mới | Shosai có ID mới, không merge theo id |
@@ -445,6 +447,13 @@ Thêm **path** vào `api_interface_generate_tool/specification/openapi.yml`:
 ---
 
 ## Version History
+
+### [1.1.0] - 2026-06-03
+- **Đồng bộ 3 thay đổi nghiệp vụ** (final_spec v1.3.0) + đã IMPLEMENT (BUILD SUCCESS), status → `implemented`:
+  - `hyojiJun` cho phép từ **0** (`[0, 9999]`).
+  - Max per kubun = **100** (trước 99).
+  - `shosaiList` **KHÔNG bắt buộc** — rỗng → xoá hết shosai cũ, không insert. Service normalize null → empty.
+- Cập nhật §2.2, §3.2, §4.1, §4.2, §8.
 
 ### [1.0.0] - 2026-06-02
 - Initial detail design cho API update.

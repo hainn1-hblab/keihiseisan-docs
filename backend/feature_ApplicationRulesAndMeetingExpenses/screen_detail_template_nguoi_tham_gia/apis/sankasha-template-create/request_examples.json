@@ -29,18 +29,29 @@
     }
   },
   {
-    "name": "edge_99_external",
-    "description": "Đúng giới hạn tối đa 99 cặp external (chỉ minh hoạ 2 phần tử đầu + cuối)",
-    "note": "Thực tế gửi đủ 99 phần tử kubun=1. count(kubun=1) = 99 → hợp lệ.",
+    "name": "edge_100_external",
+    "description": "Đúng giới hạn tối đa 100 cặp external (chỉ minh hoạ 2 phần tử đầu + cuối)",
+    "note": "Thực tế gửi đủ 100 phần tử kubun=1. count(kubun=1) = 100 → hợp lệ.",
     "body": {
       "sankashaTemplateName": "大型接待テンプレート",
-      "sankaNinzu": 99,
+      "sankaNinzu": 100,
       "memo": null,
       "hyojiJun": 100,
       "shosaiList": [
-        { "sankashaKubun": 1, "aitesakiKaishaName": "会社1", "aitesakiSankashaName": "氏名1", "hyojiJun": 1 },
-        { "sankashaKubun": 1, "aitesakiKaishaName": "会社99", "aitesakiSankashaName": "氏名99", "hyojiJun": 99 }
+        { "sankashaKubun": 1, "aitesakiKaishaName": "会社1", "aitesakiSankashaName": "氏名1", "hyojiJun": 0 },
+        { "sankashaKubun": 1, "aitesakiKaishaName": "会社100", "aitesakiSankashaName": "氏名100", "hyojiJun": 100 }
       ]
+    }
+  },
+  {
+    "name": "edge_empty_shosai",
+    "description": "Template không có người tham gia (shosaiList rỗng) — hợp lệ sau thay đổi nghiệp vụ",
+    "body": {
+      "sankashaTemplateName": "空テンプレート",
+      "sankaNinzu": 0,
+      "memo": null,
+      "hyojiJun": 0,
+      "shosaiList": []
     }
   },
   {
