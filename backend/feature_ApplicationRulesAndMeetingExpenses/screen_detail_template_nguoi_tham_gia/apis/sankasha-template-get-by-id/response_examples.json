@@ -1,0 +1,84 @@
+{
+  "success": {
+    "description": "HTTP 200 — header + shosaiList (đã enrich jishaSankashaName)",
+    "httpStatus": 200,
+    "body": {
+      "sankashaTemplateId": "TM06500001202601010900xxAB",
+      "sankashaTemplateName": "○○社用",
+      "sankaNinzu": 4,
+      "memo": "他2名",
+      "hyojiJun": 100,
+      "updateVersion": 1,
+      "shosaiList": [
+        {
+          "sankashaTemplateShosaiId": "TM06600001202601010900xxAC",
+          "sankashaKubun": 1,
+          "aitesakiKaishaName": "HBLAB株式会社",
+          "aitesakiSankashaName": "経費 太郎",
+          "hyojiJun": 1
+        },
+        {
+          "sankashaTemplateShosaiId": "TM06600001202601010900xxAD",
+          "sankashaKubun": 2,
+          "jishaSankashaJugyoinId": "TM00700001202401010900xxAB",
+          "jishaSankashaName": "経費 花子",
+          "jishaSankashaInvalid": false,
+          "hyojiJun": 2
+        }
+      ]
+    }
+  },
+  "success_with_invalid_employee": {
+    "description": "HTTP 200 — có 1 dòng kubun=2 invalid (§4.8): nhân viên đã bị xoá hoặc role=NO_RIGHT. Dòng vẫn được trả về, đánh dấu jishaSankashaInvalid=true (CHỐT #G1).",
+    "httpStatus": 200,
+    "body": {
+      "sankashaTemplateId": "TM06500001202601010900xxAB",
+      "sankashaTemplateName": "○○社用",
+      "sankaNinzu": 4,
+      "memo": "他2名",
+      "hyojiJun": 100,
+      "updateVersion": 2,
+      "shosaiList": [
+        {
+          "sankashaTemplateShosaiId": "TM06600001202601010900xxAD",
+          "sankashaKubun": 2,
+          "jishaSankashaJugyoinId": "TM00700001202401010900xxAB",
+          "jishaSankashaName": "経費 花子",
+          "hyojiJun": 1
+        },
+        {
+          "sankashaTemplateShosaiId": "TM06600001202601010900xxAE",
+          "sankashaKubun": 2,
+          "jishaSankashaJugyoinId": "TM00700001202401010900xxCD",
+          "jishaSankashaName": null,
+          "jishaSankashaInvalid": true,
+          "hyojiJun": 2
+        }
+      ]
+    }
+  },
+  "error_not_found": {
+    "description": "HTTP 404 — id không tồn tại / đã xoá / không thuộc owner (E041)",
+    "httpStatus": 404,
+    "body": {
+      "code": 4,
+      "type": "not_found",
+      "message": "指定された参加者テンプレートIDは存在しません。",
+      "status": 404,
+      "path": "/api/v1/sankasha-template/TM06500001202601010900yyZZ",
+      "timestamp": "2026-06-02 12:00:00"
+    }
+  },
+  "error_forbidden": {
+    "description": "HTTP 403 — role gọi API không thuộc {DEPARTMENT_MANAGEMENT(5), SUPER_ADMIN(6)}",
+    "httpStatus": 403,
+    "body": {
+      "code": 3,
+      "type": "forbidden",
+      "message": "権限がありません。",
+      "status": 403,
+      "path": "/api/v1/sankasha-template/TM06500001202601010900xxAB",
+      "timestamp": "2026-06-02 12:00:00"
+    }
+  }
+}

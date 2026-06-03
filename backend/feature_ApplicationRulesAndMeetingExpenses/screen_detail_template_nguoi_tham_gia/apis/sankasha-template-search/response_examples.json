@@ -1,0 +1,95 @@
+{
+  "success": {
+    "description": "HTTP 200 — list có paging, mỗi item gồm header + shosaiList (enrich jishaSankashaName)",
+    "httpStatus": 200,
+    "body": {
+      "currentPage": 1,
+      "pageSize": 50,
+      "totalPage": 1,
+      "totalElement": 2,
+      "list": [
+        {
+          "sankashaTemplateId": "TM06500001202601010900xxAB",
+          "sankashaTemplateName": "○○社用",
+          "sankaNinzu": 4,
+          "memo": "他2名",
+          "hyojiJun": 100,
+          "updateVersion": 1,
+          "shosaiList": [
+            {
+              "sankashaTemplateShosaiId": "TM06600001202601010900xxAC",
+              "sankashaKubun": 1,
+              "aitesakiKaishaName": "HBLAB株式会社",
+              "aitesakiSankashaName": "経費 太郎",
+              "hyojiJun": 1
+            },
+            {
+              "sankashaTemplateShosaiId": "TM06600001202601010900xxAD",
+              "sankashaKubun": 2,
+              "jishaSankashaJugyoinId": "TM00700001202401010900xxAB",
+              "jishaSankashaName": "経費 花子",
+              "jishaSankashaInvalid": false,
+              "hyojiJun": 2
+            }
+          ]
+        },
+        {
+          "sankashaTemplateId": "TM06500001202601010900xxBC",
+          "sankashaTemplateName": "△△社用",
+          "sankaNinzu": 2,
+          "memo": null,
+          "hyojiJun": 100,
+          "updateVersion": 3,
+          "shosaiList": [
+            {
+              "sankashaTemplateShosaiId": "TM06600001202601010900xxBD",
+              "sankashaKubun": 2,
+              "jishaSankashaJugyoinId": "TM00700001202401010900xxEF",
+              "jishaSankashaName": "経費 次郎",
+              "jishaSankashaInvalid": false,
+              "hyojiJun": 1
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "success_empty": {
+    "description": "HTTP 200 — không match điều kiện search",
+    "httpStatus": 200,
+    "body": {
+      "currentPage": 1,
+      "pageSize": 50,
+      "totalPage": 0,
+      "totalElement": 0,
+      "list": []
+    }
+  },
+  "error_bad_request": {
+    "description": "HTTP 400 — field search vượt @Size(max=250)",
+    "httpStatus": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "入力内容に誤りがあります。",
+      "status": 400,
+      "path": "/api/v1/sankasha-template/search",
+      "timestamp": "2026-06-02 12:00:00",
+      "error": {
+        "sankashaTemplateName": "250文字以内で入力してください。"
+      }
+    }
+  },
+  "error_forbidden": {
+    "description": "HTTP 403 — role gọi API không thuộc {DEPARTMENT_MANAGEMENT(5), SUPER_ADMIN(6)}",
+    "httpStatus": 403,
+    "body": {
+      "code": 3,
+      "type": "forbidden",
+      "message": "権限がありません。",
+      "status": 403,
+      "path": "/api/v1/sankasha-template/search",
+      "timestamp": "2026-06-02 12:00:00"
+    }
+  }
+}

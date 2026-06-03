@@ -1,0 +1,27 @@
+{
+  "_note": "GET /api/v1/sankasha-template/{id} không có request body. Chỉ có path param `id`. Dưới đây là các giá trị `id` mẫu để test.",
+  "happy_case": {
+    "description": "Lấy template thuộc về chính user đang đăng nhập",
+    "pathParam": {
+      "id": "TM06500001202601010900xxAB"
+    }
+  },
+  "not_found_other_owner": {
+    "description": "id của template do user KHÁC tạo (cùng hojin) → 404 (owner-scoped)",
+    "pathParam": {
+      "id": "TM06500001202601010900yyZZ"
+    }
+  },
+  "not_found_deleted": {
+    "description": "id đã bị soft delete (delete_flag=1) → 404",
+    "pathParam": {
+      "id": "TM06500001202601010900ddEE"
+    }
+  },
+  "not_found_nonexistent": {
+    "description": "id không tồn tại → 404",
+    "pathParam": {
+      "id": "TM06500001209912319999zzZZ"
+    }
+  }
+}

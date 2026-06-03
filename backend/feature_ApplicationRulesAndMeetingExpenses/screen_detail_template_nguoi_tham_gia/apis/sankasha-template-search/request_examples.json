@@ -1,0 +1,53 @@
+{
+  "happy_case": {
+    "description": "Search kết hợp cả 3 field (S1 + S2 + S3) + paging + sort",
+    "body": {
+      "sankashaTemplateName": "社用",
+      "aitesakiName": "HBLAB",
+      "jishaSankashaName": "経費",
+      "page": 1,
+      "size": 50,
+      "sortParameters": [
+        { "sortField": "hyojiJun", "sortDirection": "ASC" }
+      ]
+    }
+  },
+  "empty_search_all": {
+    "description": "Body rỗng → trả toàn bộ template của user (default size 50, sort hyoji_jun ASC)",
+    "body": {}
+  },
+  "search_by_name_only": {
+    "description": "Chỉ S1 — tên template (LIKE)",
+    "body": {
+      "sankashaTemplateName": "社用"
+    }
+  },
+  "search_by_aitesaki_only": {
+    "description": "Chỉ S2 — tên công ty hoặc người tham gia bên ngoài (kubun=1)",
+    "body": {
+      "aitesakiName": "経費 太郎"
+    }
+  },
+  "search_by_jisha_only": {
+    "description": "Chỉ S3 — tên nhân viên nội bộ (kubun=2, join tm_jugyoin)",
+    "body": {
+      "jishaSankashaName": "花子"
+    }
+  },
+  "paging_page2": {
+    "description": "Phân trang — trang 2",
+    "body": {
+      "page": 2,
+      "size": 50,
+      "sortParameters": [
+        { "sortField": "sankaNinzu", "sortDirection": "DESC" }
+      ]
+    }
+  },
+  "validation_error_name_too_long": {
+    "description": "S1 vượt 250 ký tự → 400 (@Size E002)",
+    "body": {
+      "sankashaTemplateName": "<chuỗi 251 ký tự>"
+    }
+  }
+}

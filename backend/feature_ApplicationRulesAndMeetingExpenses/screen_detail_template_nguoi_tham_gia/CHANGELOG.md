@@ -13,7 +13,13 @@ Format dựa trên [Keep a Changelog](https://keepachangelog.com/), versioning t
 ## [Unreleased] - 2026-06-02
 
 ### Added
+- `apis/sankasha-template-search/detail_design.md` v1.0.0 — detail design API search (`POST /sankasha-template/search`), kèm `request_examples.json` + `response_examples.json`. Owner-scoped filter cố định `jugyoin_id`; search xuyên bảng con `shosai` qua EXISTS subquery (S2 kubun=1 OR 2 cột, S3 kubun=2 join jugyoin); aggregate shosai per template để hiển thị multi-line (cột 5/6); enrich `jishaSankashaName` batch (tránh N+1); default size 50 + sort hyoji_jun ASC. DTO mới: `SankashaTemplateSearchParamDto`; API model mới: `SankashaTemplateSearchParameter`. → v1.1.0: **resolve #S1** — chốt trả nguyên `shosaiList` per template. → **v1.2.0: ĐÃ IMPLEMENT (BUILD SUCCESS)** — response dùng `ListResponse<SankashaTemplate>` generic (#S6, không tạo `ListSankashaTemplate`); enrich tên qua `getShimei()`; default size 50 (#S5). Code: thêm method `search`+`enrichShosaiList` vào Service, `search`+`findShosaiByTemplateIds` vào Crud/Adapter, `@Query` EXISTS subquery vào repository, endpoint vào Api/Delegate; field response additive vào API model `SankashaTemplate`/`SankashaTemplateShosai` + `SankashaTemplateShosaiDto.jishaSankashaInvalid`; openapi.yml.
+- `apis/sankasha-template-get-by-id/detail_design.md` v1.0.0 → v1.1.0 — detail design API get-by-id (`GET /sankasha-template/{id}`), kèm `request_examples.json` + `response_examples.json`. Read owner-scoped → 404, enrich `jishaSankashaName` (batch query), đánh dấu dòng invalid (§4.8) — logic ngược create/update (giữ & hiển thị thay vì chặn).
 - `apis/sankasha-template-update/detail_design.md` v1.0.0 — detail design API update (`PUT /sankasha-template/{id}`), kèm `request_examples.json` + `response_examples.json`.
+
+### Resolved (get-by-id)
+- **#G1**: cách báo dòng invalid cho FE — CHỐT dùng `boolean jishaSankashaInvalid` (`true` = không hợp lệ) trên `SankashaTemplateShosaiDto` + API model. Field additive vào response contract.
+- **#G2**: verified `findMapByJugyoinIds(hojinCode, ids)` (→ `findAllByHojinCodeAndJugyoinIdIn`, không lọc `delete_flag`) trả cả nhân viên đã xoá; `JugyoinDto` có `deleteFlag` + `kengenCode`. Lấy cả nhân viên bị xoá để xác định hợp lệ.
 
 ### Changed
 - `apis/sankasha-template-create/detail_design.md` → v1.0.1 (patch): đồng bộ final_spec v1.2.1 — bổ sung set `hojin_code = super.getHojinCode()` cho từng shosai (§4.1 step 9, §5.1); bump `based_on_final_spec_version` 1.2.0 → 1.2.1. Không đổi API contract.
