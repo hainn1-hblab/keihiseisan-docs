@@ -1,0 +1,32 @@
+[
+  {
+    "file": "image_A2.png",
+    "cell": "A2",
+    "size_bytes": 86674,
+    "media_source": "xl/media/image9.png"
+  },
+  {
+    "file": "image_A41.png",
+    "cell": "A41",
+    "size_bytes": 709489,
+    "media_source": "xl/media/image20.png"
+  },
+  {
+    "file": "image_A168.png",
+    "cell": "A168",
+    "size_bytes": 34867,
+    "media_source": "xl/media/image12.png"
+  },
+  {
+    "file": "image_A102.png",
+    "cell": "A102",
+    "size_bytes": 157587,
+    "media_source": "xl/media/image7.png"
+  },
+  {
+    "file": "image_A101.png",
+    "cell": "A101",
+    "size_bytes": 54490,
+    "media_source": "xl/media/image6.png"
+  }
+]
