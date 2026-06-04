@@ -45,6 +45,10 @@ Em nghiêng (A). Anh/chị confirm + cho giá trị cụ thể giúp em.
 - /** The foreign exchange rate certificate：外貨レート証明書. */
 GAIKA_RATE_SHOMEISHO("6", "レート証明書明細");
 
+→ Validation regex DTO phải đổi từ 1|2|4 → 1|2|4|5|6.
+→ SearchParamDto.torokuHohos regex cũng phải đổi.
+→ Branch logic trong Service phải thêm case xử lý 5 và 6.
+
 **Người trả lời**: DucNA1
 **Ngày trả lời**: 2026-06-04
 **Nguồn**:

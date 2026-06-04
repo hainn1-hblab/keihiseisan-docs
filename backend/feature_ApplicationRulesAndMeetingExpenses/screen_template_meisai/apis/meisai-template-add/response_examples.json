@@ -1,0 +1,94 @@
+[
+  {
+    "name": "success",
+    "description": "Tạo thành công (mọi mode) → I001",
+    "http_status": 200,
+    "body": {
+      "code": 0,
+      "type": "success",
+      "message": "登録が完了しました。"
+    }
+  },
+  {
+    "name": "error_validation_field",
+    "description": "Bean validation fail (vd thiếu meisaiTemplateMei, mode 5 thiếu field ngoại tệ)",
+    "http_status": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "リクエストが不正です。",
+      "status": 400,
+      "path": "/api/v1/meisaiTemplate",
+      "timestamp": "2026-06-04 12:00:00",
+      "error": {
+        "meisaiTemplateMei": "必須項目です。",
+        "gaikaShuruiId": "必須項目です。"
+      }
+    }
+  },
+  {
+    "name": "error_gaika_disabled",
+    "description": "🆕 mode 5/6 nhưng công ty chưa bật ngoại tệ (gaikaRiyoUmu != 1) — ⚠️ message key chốt ở TBD-C2",
+    "http_status": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "外貨機能が利用できません。",
+      "status": 400,
+      "path": "/api/v1/meisaiTemplate",
+      "timestamp": "2026-06-04 12:00:00"
+    }
+  },
+  {
+    "name": "error_duplicate_name",
+    "description": "↔️ trùng tên template trong phạm vi user → E040",
+    "http_status": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "既存テンプレート名は既に登録されています。",
+      "status": 400,
+      "path": "/api/v1/meisaiTemplate",
+      "timestamp": "2026-06-04 12:00:00"
+    }
+  },
+  {
+    "name": "error_keihi_kamoku_not_allow_ryoshusho",
+    "description": "↔️ mode 1/5: keihiKamoku có ryoshushoSentakuKanousei=0 → E157",
+    "http_status": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "経費科目名は領収書明細で選択できません。",
+      "status": 400,
+      "path": "/api/v1/meisaiTemplate",
+      "timestamp": "2026-06-04 12:00:00"
+    }
+  },
+  {
+    "name": "error_fk_not_found",
+    "description": "↔️ FK (project/busho/kamoku/zeikubun) không tồn tại → E041",
+    "http_status": 404,
+    "body": {
+      "code": 4,
+      "type": "not_found",
+      "message": "指定されたプロジェクトIDは存在しません。",
+      "status": 404,
+      "path": "/api/v1/meisaiTemplate",
+      "timestamp": "2026-06-04 12:00:00"
+    }
+  },
+  {
+    "name": "error_forbidden_role",
+    "description": "↔️ role không hợp lệ → 403",
+    "http_status": 403,
+    "body": {
+      "code": 3,
+      "type": "forbidden",
+      "message": "アクセス権限がありません。",
+      "status": 403,
+      "path": "/api/v1/meisaiTemplate",
+      "timestamp": "2026-06-04 12:00:00"
+    }
+  }
+]
