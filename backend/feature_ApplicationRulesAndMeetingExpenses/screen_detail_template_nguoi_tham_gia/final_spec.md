@@ -1,7 +1,7 @@
 ---
-version: 1.3.1
+version: 1.4.0
 status: ready-for-implementation
-last_updated: 2026-06-03
+last_updated: 2026-06-04
 based_on_spec_analysis_version: 1.0.0
 based_on_clarifications_version: 1.1.1
 unresolved_questions_count: 0
@@ -224,6 +224,38 @@ Khi một nhân viên đã được lưu trong template (`tm_sankasha_template_s
 - **Không tự động xoá** dòng đó khỏi template (giữ nguyên dữ liệu trong DB).
 - Tại màn **Detail**, dòng đó được hiển thị như **dữ liệu không hợp lệ** (invalid) để user nhận biết.
 - Khi user **cập nhật** template hoặc **áp dụng** template (chọn vào meisai), hệ thống **báo lỗi** và **bắt buộc** user chọn lại nhân viên khác hoặc xoá nhân viên không hợp lệ khỏi template trước khi tiếp tục (không cho lưu/áp dụng khi còn dòng invalid).
+
+### 4.9 Cross-screen behaviour với meisai_template — BLOCK delete khi đang được sử dụng (chốt 2026-06-04)
+
+> Phát sinh từ phase EXTEND màn meisai-template (clarification meisai #6.6, revise 2026-06-04). Liên kết:
+> [`screen_template_meisai/final_spec.md` §4.4](../screen_template_meisai/final_spec.md).
+
+`tm_meisai_template` (template chi tiết hoá đơn / hoá đơn ngoại tệ) tham chiếu participant template qua
+`tm_meisai_template.sankasha_template_id` (quan hệ N:1 — §5.3). Khi xoá 1 participant template:
+
+- **Pre-check usage**: trước khi soft-delete, đếm số `tm_meisai_template` có `sankasha_template_id = <id đang xoá>`
+  **AND `delete_flag = 0`** (chỉ tính meisai template đang sử dụng; bản đã soft-delete KHÔNG tính — #6.6.Q3).
+- **Có usage (count > 0) → BLOCK**: KHÔNG xoá; throw `BadRequestException` với message **`E180`** kèm **tên** participant template:
+  - Format: "{tên sankasha} đang được sử dụng trong meisai template, không xóa được" (#6.6.Q1).
+  - Message key **`E180`** (⚠️ E158 đã bị dùng — `messages.properties:188`; E180 là key trống tiếp theo).
+    Đề xuất JP: `E180={0}は明細テンプレートで使用されているため、削除できません。`
+- **Áp dụng cả single delete và bulk delete** (#6.6.Q2):
+  - **Single** (`deleteOne`): block ngay nếu chính nó đang được dùng.
+  - **Bulk** (`deleteList`): **pre-check TẤT CẢ items trước**, gom danh sách bị block; nếu danh sách ≠ rỗng →
+    throw `E180` với các tên nối bằng `, ` → **fail toàn bộ, không xoá item nào** (all-or-nothing).
+- **Đảo ngược phương án trước**: trước đây dự kiến cascade set NULL `sankasha_template_id`; nay **đổi sang BLOCK**.
+
+**Điểm sửa code** (implementation impact — chưa thuộc phạm vi tài liệu này):
+- `SankashaTemplateService.deleteOne()` + `deleteList()`: thêm pre-check usage.
+- Thêm method `MeisaiTemplateCrud.countBySankashaTemplateIdAndDeleteFlag(String sankashaTemplateId, Integer deleteFlag)`
+  + `MeisaiTemplateAdapter` impl + `TmMeisaiTemplateRepository.countBySankashaTemplateIdAndDeleteFlag`.
+- Inject `MeisaiTemplateCrud` vào `SankashaTemplateService`.
+- Phụ thuộc: entity `TmMeisaiTemplate` đã có field `sankashaTemplateId` (thuộc phase meisai-template extend).
+- ADD message `E180` vào `messages.properties` + `messages_ja.properties`.
+
+Chi tiết sequence/test: xem [`apis/sankasha-template-delete/detail_design.md`](./apis/sankasha-template-delete/detail_design.md)
+và [`apis/sankasha-template-bulk-delete/detail_design.md`](./apis/sankasha-template-bulk-delete/detail_design.md).
+
 ---
 
 ## 5. Database Schema
@@ -300,7 +332,7 @@ Khi một nhân viên đã được lưu trong template (`tm_sankasha_template_s
 | `tm_sankasha_template` | `jugyoin_id` | `tm_jugyoin` | N : 1 | Mỗi template thuộc về 1 nhân viên (owner) |
 | `tm_sankasha_template_shosai` | `sankasha_template_id` | `tm_sankasha_template` | N : 1 | Mỗi shosai row thuộc về 1 template (1 template có N shosai) |
 | `tm_sankasha_template_shosai` | `jisha_sankasha_jugyoin_id` | `tm_jugyoin` | N : 1 (nullable) | Trỏ tới nhân viên trong công ty (khi `sankasha_kubun = 2`) |
-| `tm_meisai_template` | `sankasha_template_id` | `tm_sankasha_template` | N : 1 | Template chi tiết hoá đơn / hoá đơn ngoại tệ tham chiếu participant template |
+| `tm_meisai_template` | `sankasha_template_id` | `tm_sankasha_template` | N : 1 | Template chi tiết hoá đơn / hoá đơn ngoại tệ tham chiếu participant template. **Xoá parent bị BLOCK** nếu còn meisai (`delete_flag=0`) tham chiếu — xem §4.9 |
 
 **On-delete behavior**: file thiết kế **không nêu rõ** ON DELETE cho FK. Áp dụng soft-delete pattern (`delete_flag`), không tạo FK constraint hard ở DB (theo convention dự án) — service phải tự đảm bảo integrity.
 
@@ -366,6 +398,10 @@ Khi một nhân viên đã được lưu trong template (`tm_sankasha_template_s
 - Convention rules:
   - API: `.claude/rules/api-conventions.md`
   - Database / Liquibase: `.claude/rules/database.md`
+- Cross-screen (BLOCK delete khi đang dùng — §4.9):
+  - [`screen_template_meisai/final_spec.md` §4.4](../screen_template_meisai/final_spec.md)
+  - [`screen_template_meisai/clarifications.md` #6.6](../screen_template_meisai/clarifications.md) (revise 2026-06-04 → BLOCK)
+  - Message key: **E180** (E158 đã dùng)
 - Ảnh mockup (extract từ sheet spec gốc):
   - `images/image_B5.png` — Action buttons row (`編集` / `削除`)
   - `images/image_A10.png` — Wireframe màn hình Detail
@@ -374,6 +410,16 @@ Khi một nhân viên đã được lưu trong template (`tm_sankasha_template_s
 ---
 
 ## Version History
+
+### [1.4.0] - 2026-06-04
+
+- **Thêm cross-screen behaviour với meisai_template (§4.9 mới)** — chốt theo clarification meisai #6.6 (revise 2026-06-04):
+  - Khi xoá participant template (single/bulk) → **BLOCK** nếu còn ≥1 `tm_meisai_template` (`delete_flag=0`) tham chiếu; throw message **`E180`** kèm tên template. Bulk: pre-check ALL, ≥1 block → fail toàn bộ.
+  - Đảo ngược phương án dự kiến trước (cascade set NULL) → BLOCK.
+  - §5.3: cập nhật cột "Mục đích" của relation `tm_meisai_template → tm_sankasha_template` (trỏ §4.9).
+  - §8: thêm link cross-screen tới final_spec/clarifications màn meisai + message key E180.
+- Implementation impact (chưa code): pre-check ở `SankashaTemplateService.deleteOne()`/`deleteList()`; thêm `MeisaiTemplateCrud.countBySankashaTemplateIdAndDeleteFlag`; ADD message `E180` (E158 đã dùng).
+- Minor bump (thêm business rule cross-screen; không đổi schema 2 bảng sankasha).
 
 ### [1.3.1] - 2026-06-03
 

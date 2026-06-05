@@ -1,11 +1,11 @@
 ---
-version: 1.0.0
+version: 1.1.0
 status: ready-for-implementation
 last_updated: 2026-06-04
 based_on_spec_analysis_version: 1.0.0
-based_on_clarifications_version: 1.0.0
+based_on_clarifications_version: 1.1.0
 based_on_current_analysis_version: 1.0.0
-unresolved_questions_count: 4
+unresolved_questions_count: 3
 mode: EXTEND
 ---
 
@@ -136,11 +136,22 @@ Modal `明細テンプレート設定画面` có **4 biến thể** theo `toroku
 ### 4.4 🆕 Save strategy cho `sankasha_template_id`
 - Lưu **reference only** (chỉ `sankashaTemplateId`, KHÔNG snapshot danh sách người tham gia) — clarification 6.6.
 - Chỉ set/áp dụng khi `torokuHoho ∈ {1, 5}`; mode `{2, 4, 6}` → luôn NULL (clarification 6.7).
-- **Cascade khi xóa sankasha_template** (clarification 6.6): khi 1 `tm_sankasha_template` bị soft-delete →
-  tất cả `tm_meisai_template` có `sankasha_template_id` = id đó phải **set `sankasha_template_id = NULL`**
-  (KHÔNG xóa meisai template — nó vẫn dùng được như template thường).
-  - **Điểm sửa**: `SankashaTemplateService.deleteOne()` (`application/service/SankashaTemplateService.java:383`)
-    — sau khi soft-delete sankasha, gọi thêm logic cập nhật meisai template. ⚠️ Xem TBD-3 (chốt đặt logic ở đâu).
+- ✏️ **Cascade khi xóa sankasha_template — REVISE 2026-06-04 (FPM)**: chuyển từ "set NULL" sang **BLOCK**.
+  - ~~Phương án cũ: set NULL `sankasha_template_id` ở meisai tham chiếu.~~
+  - **Phương án chốt: BLOCK xóa** `tm_sankasha_template` nếu còn ≥1 `tm_meisai_template` (`delete_flag=0`) tham chiếu.
+  - Pseudo-code (đặt trong `SankashaTemplateService.deleteOne()` — `application/service/SankashaTemplateService.java:383`):
+    ```
+    Trong SankashaTemplateService.deleteOne(id):
+      count = meisaiTemplateCrud.countBySankashaTemplateIdAndDeleteFlag(id, 0)
+      if (count > 0):
+        throw BadRequestException(MessageUtil.getMessage("E180", sankashaName))
+      // tiếp tục soft delete như current
+    ```
+  - Áp cho **cả single delete và bulk delete**. Bulk: pre-check ALL items, ≥1 block → **fail toàn bộ** (atomic).
+    Chi tiết bulk (gom tất cả tên blocked): xem [`screen_detail_template_nguoi_tham_gia/final_spec.md` §4.9](../screen_detail_template_nguoi_tham_gia/final_spec.md).
+  - Chỉ count meisai `delete_flag=0` (đã soft-delete không tính) — clarification 6.6.Q3.
+  - **Message key**: `E180` (⚠️ E158 đã bị dùng → dùng E180). Cần ADD vào `messages*.properties` khi implement.
+  - **Điểm sửa code**: thuộc API delete/bulk-delete của màn sankasha (xem cross-screen §4.9 màn đó). API add này KHÔNG bị ảnh hưởng.
 
 ### 4.5 ↔️ Delete behavior
 - Giữ nguyên: bulk soft delete (`deleteList`), `delete_flag=1` + `update_version`, owner-scoped. Bổ sung guard §4.2 cho mode 5/6.
@@ -179,7 +190,7 @@ Giữ nguyên toàn bộ (PK `meisai_template_id`, `kingaku`, `delete_flag`, `up
 | `tm_meisai_template` | `sankasha_template_id` | `tm_sankasha_template` | N : 1 | Áp dụng template người tham gia |
 | `tm_meisai_template` | `gaika_shurui_id` | GaikaShurui (TM057) | N : 1 | Loại ngoại tệ |
 
-**On-delete**: soft FK (không ràng buộc FK vật lý). Khi sankasha bị xóa → set NULL (§4.4). KHÔNG index mới (giữ pattern bảng hiện tại — current_analysis §1.3).
+**On-delete**: soft FK (không ràng buộc FK vật lý). Khi sankasha bị xóa → **BLOCK** nếu còn meisai (`delete_flag=0`) tham chiếu (§4.4, revise 2026-06-04). KHÔNG index mới (giữ pattern bảng hiện tại — current_analysis §1.3).
 
 ### 5.4 Skeleton Liquibase (tham khảo — KHÔNG phải file chính thức)
 
@@ -242,11 +253,11 @@ thấy thì cập nhật trực tiếp model đã gen (clarification 6.12a). ⚠
 |---|---|---|---|---|---|
 | 1 | Precision/scale `rate` & `en_kansan_kingaku` | Plain `NUMERIC` (giống `kingaku` + `tr_meisai_joho.rate`); FE handle TP (rate=4, 外貨金額=2). BE không đặt `@Digits` (theo `MeisaiJohoDto`) | Medium | 6.4 | Trước khi finalize Liquibase |
 | 2 | File OpenAPI spec để extend chưa rõ | Tìm khi implement; nếu không có → sửa model đã gen tay | Medium | 6.12a | Trước khi sửa API contract |
-| 3 | Nơi đặt logic cascade set-null khi xóa sankasha_template | Sửa `SankashaTemplateService.deleteOne()` (:383) gọi cập nhật `tm_meisai_template` (set NULL `sankasha_template_id` theo `sankashaTemplateId`) — cần thêm method ở `MeisaiTemplateCrud`/repository (`UPDATE ... SET sankasha_template_id=NULL WHERE sankasha_template_id=?`) | Medium | 6.6 | Trong sprint (trước UAT) |
+| 3 | ✅ **RESOLVED 2026-06-04** — cascade khi xóa sankasha_template | **Chốt phương án BLOCK** (không set NULL): block xóa sankasha nếu còn ≥1 meisai `delete_flag=0` tham chiếu; throw `E180`. Implement ở `SankashaTemplateService.deleteOne()`/`deleteList()` (màn sankasha) + method mới `MeisaiTemplateCrud.countBySankashaTemplateIdAndDeleteFlag(id, 0)`. Xem §4.4. | ~~Medium~~ RESOLVED | 6.6 | — (đã chốt) |
 | 4 | Hiển thị cột 金額 ở list khi mode 5 (yên hay ngoại tệ + ký hiệu) | BE trả raw `kingaku` + `gaikaShuruiId`; FE tự format | Low | 6.5 | Trước UAT |
 
 **Không có TBD High** → `status: ready-for-implementation`.
-TBD-3 mang tính cross-screen (đụng `SankashaTemplateService`) — nên chốt cách đặt logic trước khi code phần delete.
+~~TBD-3 cross-screen~~ → đã RESOLVED (phương án BLOCK). Logic delete nằm ở màn sankasha; API add này không bị ảnh hưởng. Còn **3 TBD** (0 High, 2 Medium #C2/§4.2-setting, #C3-seigen... thực tế: #1 Low, #2 Medium-OpenAPI, #4 Low).
 
 **Severity legend**: High = sai → sửa schema/contract (block code) · Medium = sửa vài giờ · Low = chỉ chỉnh constant/config/format.
 
@@ -263,13 +274,24 @@ TBD-3 mang tính cross-screen (đụng `SankashaTemplateService`) — nên chố
 - Source tham chiếu validation ngoại tệ: `application/domain/MeisaiJohoDto.java` (`gaikaShuruiId`/`rate`/`kingaku`/`enKansanKingaku`)
 - Source enum mode: `application/enums/TorokuHoho.java` (`RECEIPT_GAIKA="5"`, `GAIKA_RATE_SHOMEISHO="6"`)
 - Source setting ngoại tệ: `TmKaisha.gaikaRiyoUmu` · GaikaShurui master: `TableCode.TM057`
-- Source cascade: `application/service/SankashaTemplateService.java` (method `deleteOne`, :383)
+- Source cascade (BLOCK): `application/service/SankashaTemplateService.java` (method `deleteOne`, :383) — xem [`screen_detail_template_nguoi_tham_gia/final_spec.md` §4.9](../screen_detail_template_nguoi_tham_gia/final_spec.md)
+- Message key cascade BLOCK: **E180** (⚠️ E158 đã bị dùng — `messages.properties:188`); cần ADD `E180={0}は明細テンプレートで使用されているため、削除できません。`
+- Quyết định cascade: [`clarifications.md` #6.6](./clarifications.md) (revise 2026-06-04 → BLOCK)
 - Convention: `.claude/rules/api-conventions.md`, `.claude/rules/database.md`
 - Mockup: `images/image_A41.png`, `image_A101.png`, `image_A102.png`, `image_A168.png`, `image_A2.png`
 
 ---
 
 ## Version History
+
+### [1.1.0] - 2026-06-04
+
+- **Revise cascade behaviour (FPM, clarification #6.6)** — chuyển từ "cascade set NULL" → **BLOCK xóa sankasha_template** khi còn meisai (`delete_flag=0`) tham chiếu:
+  - §4.4 rewrite pseudo-code BLOCK + message key `E180` (⚠️ E158 đã dùng).
+  - §7 TBD-3 → **RESOLVED**; `unresolved_questions_count` 4 → 3.
+  - §8 thêm reference E180 + link cross-screen tới final_spec sankasha §4.9.
+  - `based_on_clarifications_version` 1.0.0 → 1.1.0.
+- Minor bump (đổi behaviour cascade; không đổi schema 4 cột đã chốt).
 
 ### [1.0.0] - 2026-06-04
 

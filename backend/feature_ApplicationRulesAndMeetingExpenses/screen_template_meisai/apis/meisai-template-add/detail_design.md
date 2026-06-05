@@ -1,12 +1,12 @@
 ---
-version: 1.0.0
+version: 1.0.1
 status: ready-for-implementation
 api_name: AddMeisaiTemplate
 http_method: POST
 endpoint: /api/v1/meisaiTemplate
 last_updated: 2026-06-04
-based_on_final_spec_version: 1.0.0
-based_on_clarifications_version: 1.0.0
+based_on_final_spec_version: 1.1.0
+based_on_clarifications_version: 1.1.0
 mode: EXTEND
 ---
 
@@ -282,7 +282,7 @@ Field bổ sung cho schema `MeisaiTemplate`:
 | C1 | Precision/scale `rate`/`enKansanKingaku` | Plain `BigDecimal`/`NUMERIC` (no `@Digits`, đã verify `MeisaiJohoDto`); FE handle TP | Low (resolved tầng DB) | final_spec TBD-1 |
 | C2 | Setting check ngoại tệ: exception type + message key + inject `KaishaCrud` ở đâu | `BadRequestException` + message key mới (vd `Exxx`); inject `KaishaCrud` vào `MeisaiTemplateService` | Medium | final_spec §4.2 / clarification 6.2 |
 | C3 | Seigen (制限値) cho mode 5/6 đếm theo nhóm nào | mode 5 → nhóm RYOSHUSHO; mode 6 → cần xác nhận có giới hạn riêng không (assume dùng RYOSHUSHO hoặc bỏ qua) | Medium | current_analysis §5.2 / final_spec |
-| C4 | **Cascade** khi xóa sankasha_template (set NULL `sankasha_template_id`) | Implement ở `SankashaTemplateService.deleteOne()` — **KHÔNG thuộc API add này** nhưng ảnh hưởng tính nhất quán dữ liệu mà add tạo ra. Team đang discuss | Medium (pending) | final_spec TBD-3 / clarification 6.6 |
+| C4 | ✅ **RESOLVED 2026-06-04** — cascade khi xóa sankasha_template | **Chốt phương án BLOCK** (không set NULL): block xóa sankasha nếu còn ≥1 meisai (`delete_flag=0`) tham chiếu, throw `E180`. Implement ở API **sankasha-template-delete/bulk-delete** (xem [`../../../screen_detail_template_nguoi_tham_gia/final_spec.md` §4.9](../../../screen_detail_template_nguoi_tham_gia/final_spec.md) + 2 detail_design delete/bulk-delete). **API add này KHÔNG bị ảnh hưởng.** | ~~Medium~~ RESOLVED | final_spec TBD-3 / clarification 6.6 |
 
 **Severity legend**: High = schema/contract; Medium = handler/logic; Low = constant/config.
 
@@ -301,6 +301,12 @@ Field bổ sung cho schema `MeisaiTemplate`:
 ---
 
 ## Version History
+
+### [1.0.1] - 2026-06-04
+- **§9 TBD-C4 RESOLVED** — cascade khi xóa sankasha_template: chốt phương án **BLOCK** (không set NULL),
+  implement ở API sankasha-template-delete/bulk-delete; **API add này KHÔNG bị ảnh hưởng**.
+- Cập nhật `based_on_final_spec_version` 1.0.0 → 1.1.0, `based_on_clarifications_version` 1.0.0 → 1.1.0.
+- Patch bump (chỉ cập nhật reference/TBD; không đổi logic API add).
 
 ### [1.0.0] - 2026-06-04
 - Initial detail design cho API ADD MeisaiTemplate (phase EXTEND).

@@ -1,11 +1,11 @@
 ---
-version: 1.1.0
+version: 1.2.0
 status: implemented
 api_name: SankashaTemplateBulkDelete
 http_method: DELETE
 endpoint: /api/v1/sankasha-template
-last_updated: 2026-06-03
-based_on_final_spec_version: 1.2.1
+last_updated: 2026-06-04
+based_on_final_spec_version: 1.4.0
 based_on_clarifications_version: 1.1.0
 ---
 
@@ -90,6 +90,7 @@ Xem [`request_examples.json`](./request_examples.json).
 |---|---|---|---|---|
 | 400 | `BadRequestException` | `E005` | Phần tử thiếu `sankashaTemplateId` / `updateVersion` | per-element validate (GroupUpdate) |
 | 404 | `NotFoundException` | `E041` (param: id, fieldName) | 🆕 Một phần tử có `id` không tồn tại / đã xoá / **không thuộc owner** → **rollback toàn bộ** | Read owner-scoped trả null |
+| 400 | `BadRequestException` | 🆕 `E180` | 🆕 ≥1 phần tử đang được dùng bởi `tm_meisai_template` (`delete_flag=0`) → BLOCK **toàn bộ** (gom tên các template bị block) | param {0} = tên(các) template join `, `; ⚠️ E158 đã dùng → E180 |
 | 409 / 400 | `OptimisticLockException` → map | (msg conflict) ⚠️ key TBD | `updateVersion` của 1 phần tử lệch version DB → **rollback toàn bộ** | chung #D2/#U2 |
 | 403 | `ForbiddenException` | (`ResponseErrorType.FORBIDDEN`) | Role ∉ {DEPARTMENT_MANAGEMENT, SUPER_ADMIN} | `RoleUtil.check(...)` |
 | 401 | `UnAuthorizedException` | — | Token thiếu/không hợp lệ | security filter |
@@ -111,14 +112,25 @@ SankashaTemplateApiController.deleteListSankashaTemplate(List<SankashaTemplate>)
                     1. RoleUtil.check(getLoginUserDto(),
                          Roles.DEPARTMENT_MANAGEMENT, Roles.SUPER_ADMIN)   → 403
                     2. (phòng thủ) list null/empty → xử lý theo #BD2
-                    3. for each dto → deleteOne(dto):
+                    3. 🆕 PRE-CHECK USAGE cho TẤT CẢ items (BLOCK — final_spec §4.9):
+                         blocked = []
+                         for each dto:
+                           existing = read owner-scoped (hojinCode, dto.id, loginJugyoinId, delete_flag=0)
+                                      → NotFoundException (E041/404) nếu null
+                           count = meisaiTemplateCrud.countBySankashaTemplateIdAndDeleteFlag(dto.id, 0)
+                           if (count > 0): blocked.add(existing.getSankashaTemplateName())
+                         if (!blocked.isEmpty()):
+                           throw new BadRequestException(
+                               MessageUtil.getMessage("E180", String.join(", ", blocked)))
+                           // → KHÔNG xoá item nào (all-or-nothing)
+                    4. for each dto → deleteOne(dto):
                          a. validate(dto, GroupUpdate.class)  (id + updateVersion) → 400
                          b. read owner-scoped (hojinCode, id, loginJugyoinId, delete_flag=0)
                             → NotFoundException (E041/404) nếu null
                          c. existing.setUpdateVersion(dto.updateVersion)
                             existing.setDeleteFlag(DeleteFlag.DELETED)  (1)
                          d. crud.save(existing)   (JPA @Version check)
-                    4. addLogDataOwnerId(getLoginJugyoinId())
+                    5. addLogDataOwnerId(getLoginJugyoinId())
         - ApiUtil.makeSimpleResponse(MessageUtil.getMessage("I006"))
         - return ApiUtil.responseEntity(body, request)
 ```
@@ -127,8 +139,12 @@ SankashaTemplateApiController.deleteListSankashaTemplate(List<SankashaTemplate>)
 
 ### 4.2 Transaction (all-or-nothing) 🆕 DIFF
 - Toàn bộ vòng lặp trong **1 `@Transactional`**.
-- Nếu **bất kỳ** phần tử nào fail (404 / conflict / validation) → **rollback toàn bộ**, không xoá phần tử nào.
+- Nếu **bất kỳ** phần tử nào fail (404 / conflict / validation / 🆕 BLOCK usage E180) → **rollback toàn bộ**, không xoá phần tử nào.
 - Lý do: bulk action mong đợi atomic; tránh trạng thái "xoá được 3/5".
+
+> 🆕 **Pre-check usage ĐẶT TRƯỚC vòng xoá** (step 3): tuy `@Transactional` đã đảm bảo atomic, ta vẫn gom
+> **TẤT CẢ** template bị block (đang dùng bởi meisai `delete_flag=0`) rồi báo 1 lần (`E180` với tên nối `, `)
+> thay vì fail-fast từng cái → UX tốt hơn (user thấy hết template cần gỡ trước). Chỉ count meisai `delete_flag=0`.
 
 ### 4.3 Owner-scoped & soft delete
 - Giống delete đơn: mỗi phần tử read owner-scoped → set `delete_flag=1` + `update_version`.
@@ -157,6 +173,11 @@ SankashaTemplateApiController.deleteListSankashaTemplate(List<SankashaTemplate>)
 | Output port / Adapter / Repository | — | reuse `read` + `save` (đã có từ update) |
 
 > ✅ Không thêm hạ tầng DB mới — chỉ thêm service method + delegate + endpoint. Nên refactor logic xoá 1 record thành private `deleteOne(SankashaTemplateDto)` để cả `delete` và `deleteList` dùng chung.
+
+> 🆕 **Dependency mới (cross-screen BLOCK — final_spec §4.9, requires code update)**: giống API delete đơn —
+> inject `MeisaiTemplateCrud` vào `SankashaTemplateService`; thêm `MeisaiTemplateCrud.countBySankashaTemplateIdAndDeleteFlag(String, Integer)`
+> + impl ở `MeisaiTemplateAdapter` + `TmMeisaiTemplateRepository`. `deleteList` thêm vòng **pre-check ALL** (step 3)
+> gom tên blocked → throw `E180`. Phụ thuộc entity `TmMeisaiTemplate.sankashaTemplateId`. ADD message `E180` vào properties.
 
 ---
 
@@ -210,6 +231,9 @@ Thêm `delete` vào path `/sankasha-template` (gộp chung với `post` của cr
 | 7 | List rỗng `[]` / null | theo #BD2 (tạm 400 hoặc no-op I006) |
 | 8 | Role gọi API = `REGISTRATION` (3) | 403 |
 | 9 | Sau xoá: search list không còn các template đó | Không xuất hiện |
+| 10 | 🆕 Bulk 3 items, 1 trong 3 đang được dùng bởi meisai (`delete_flag=0`) | 400 **E180**, **KHÔNG item nào bị delete** (rollback toàn bộ) |
+| 11 | 🆕 Bulk 3 items, 2 đang được dùng | 400 **E180** với **cả 2 tên** nối `, `, không xoá item nào |
+| 12 | 🆕 Bulk items có meisai nhưng tất cả `delete_flag=1` | 200 I006 (không block) |
 
 ### 8.2 Integration test
 - DELETE bulk happy (3 id) → 200 I006; query DB cả 3 `delete_flag=1`.
@@ -228,6 +252,7 @@ Thêm `delete` vào path `/sankasha-template` (gộp chung với `post` của cr
 | BD2 | List rỗng / null xử lý thế nào? | FE đã disable nút khi 0 tick. Backend phòng thủ: tạm coi list rỗng → **no-op trả I006** (hoặc 400). Chốt với FE/Lead. | **Low** | final_spec §2.3 |
 | BD3 | Bulk fail 1 phần tử → rollback toàn bộ hay best-effort (xoá được phần nào hay phần đó)? | **Rollback toàn bộ** (atomic, `@Transactional`). An toàn & dễ hiểu cho user. | **Medium** | final_spec §4.5 (không nêu rõ) |
 | D2 | `OptimisticLockException` map HTTP status nào | Chung với delete #D2 / update #U2. Verify `CustomGlobalExceptionHandler`. | **Medium** | `CustomGlobalExceptionHandler` |
+| BD4 | 🆕 Message key BLOCK delete + cách gom nhiều tên | **`E180`** (E158 đã dùng); bulk gom các tên blocked nối `, ` vào 1 param `{0}`. ADD `E180={0}は明細テンプレートで使用されているため、削除できません。` vào properties. | **Low** | final_spec §4.9; clarification meisai #6.6 |
 
 **Severity legend**: High = schema/contract; Medium = handler/logic; Low = constant/config.
 
@@ -241,10 +266,19 @@ Thêm `delete` vào path `/sankasha-template` (gộp chung với `post` của cr
 - **Reference impl**: `backend/src/main/java/jp/co/keihi/application/service/MeisaiTemplateService.java` (`deleteList` → loop `delete`)
 - `MeisaiTemplateApi.deleteListMeisaiTemplate` (DELETE với body `List<...>`)
 - DeleteFlag enum: `jp.co.keihi.application.enums.DeleteFlag` (`DELETED = 1`)
+- 🆕 Cross-screen BLOCK (final_spec §4.9): [`../../final_spec.md` §4.9](../../final_spec.md) + [`screen_template_meisai/final_spec.md` §4.4 / TBD-3 RESOLVED](../../../screen_template_meisai/final_spec.md)
 
 ---
 
 ## Version History
+
+### [1.2.0] - 2026-06-04
+- **🆕 Cross-screen BLOCK delete** (final_spec §4.9, clarification meisai #6.6 revise 2026-06-04):
+  - §4.1: thêm step **3 PRE-CHECK USAGE cho TẤT CẢ items** trước vòng xoá; gom tên blocked → throw **E180** (nối `, `), fail toàn bộ.
+  - §4.2: bổ sung lý do pre-check-all (gom & report 1 lần). §3.2: thêm error 400 E180.
+  - §6: dependency mới (`MeisaiTemplateCrud.countBySankashaTemplateIdAndDeleteFlag`). §8: thêm test #10–#12. #BD4: message key E180.
+- ⚠️ **Requires code update**: phần bulk cũ đã `implemented`; pre-check-all BLOCK là code MỚI cần thêm. Status giữ `implemented` cho phần cơ bản, delta pre-check pending code.
+- Minor bump (thêm business rule cross-screen).
 
 ### [1.1.0] - 2026-06-03
 - **ĐÃ IMPLEMENT** (BUILD SUCCESS), status → `implemented`.

@@ -10,6 +10,30 @@ Format dựa trên [Keep a Changelog](https://keepachangelog.com/), versioning t
 
 ---
 
+## [1.4.0] - 2026-06-04
+
+### Changed
+- **final_spec.md → v1.4.0** — thêm **§4.9 cross-screen behaviour với meisai-template**: khi xoá participant template (single/bulk) → **BLOCK** nếu còn ≥1 `tm_meisai_template` (`delete_flag=0`) tham chiếu (đảo ngược phương án cascade set NULL dự kiến trước). §5.3 cập nhật cột "Mục đích" relation; §8 thêm link cross-screen.
+- **apis/sankasha-template-delete/detail_design.md → v1.2.0** — thêm step PRE-CHECK USAGE (count > 0 → throw E180); +error 400 E180; +4 test case (#9–#12); +dependency `MeisaiTemplateCrud`.
+- **apis/sankasha-template-bulk-delete/detail_design.md → v1.2.0** — thêm PRE-CHECK USAGE cho TẤT CẢ items trước vòng xoá (gom tên blocked → E180, fail toàn bộ); +test #10–#12.
+
+### Cross-references
+- Liên quan phase EXTEND meisai-template (clarifications meisai **#6.6** updated 2026-06-04).
+- Phương án cuối: **BLOCK xóa** (KHÔNG cascade set NULL như câu trả lời ban đầu).
+- meisai-template: `final_spec.md` v1.1.0 (§4.4, TBD-3 RESOLVED), `clarifications.md` #6.6, `apis/meisai-template-add/detail_design.md` v1.0.1 (TBD-C4 RESOLVED).
+
+### Implementation impact (chưa code — task downstream)
+- `SankashaTemplateService.deleteOne()`: thêm pre-check usage (single).
+- `SankashaTemplateService.deleteList()`: thêm pre-check ALL items (bulk, all-or-nothing).
+- `MeisaiTemplateCrud`: thêm method `countBySankashaTemplateIdAndDeleteFlag(String, Integer)`.
+- `MeisaiTemplateAdapter`: implement method.
+- `TmMeisaiTemplateRepository`: thêm `countBySankashaTemplateIdAndDeleteFlag`.
+- `BeanConfiguration`: inject `MeisaiTemplateCrud` vào `SankashaTemplateService`.
+- Phụ thuộc: entity `TmMeisaiTemplate` đã có field `sankashaTemplateId` (phase meisai-template extend).
+- **Message key mới: `E180`** — ⚠️ **E158 ĐÃ BỊ DÙNG** (`messages.properties:188`); E180 là key trống tiếp theo. ADD `E180={0}は明細テンプレートで使用されているため、削除できません。` vào `messages.properties` + `messages_ja.properties`.
+
+---
+
 ## [Unreleased] - 2026-06-03
 
 ### Fixed

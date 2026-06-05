@@ -1,0 +1,62 @@
+name: Pull Request Line of Code (LOC) Report
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  pr_loc:
+    name: Calculate LOC
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Fetch target branch
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+
+      - name: Calculate LOC and Prepare Comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Calculating LOC and preparing comment..."
+          
+          # Make sure the script is executable
+          chmod +x ./calc_loc.sh
+          
+          # Run the calculation script
+          OUTPUT=$(./calc_loc.sh "origin/${{ github.event.pull_request.base.ref }}")
+          
+          COMMENT_MARKER="<!-- PR_LOC_COMMENT_MARKER -->"
+          
+          # Safely write the comment body to a temporary file
+          echo "$COMMENT_MARKER" > pr_loc_comment.md
+          echo "### 📊 Báo cáo Line of Code (LOC)" >> pr_loc_comment.md
+          echo "" >> pr_loc_comment.md
+          echo "$OUTPUT" >> pr_loc_comment.md
+          
+          echo "Finding old LOC comments..."
+          # Fetch comments on this Pull Request
+          COMMENTS=$(gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments --paginate)
+          
+          # Extract comment IDs that contain our COMMENT_MARKER
+          COMMENT_IDS=$(echo "$COMMENTS" | jq -r ".[] | select(.body | contains(\"$COMMENT_MARKER\")) | .id")
+          
+          for COMMENT_ID in $COMMENT_IDS; do
+            if [ "$COMMENT_ID" != "null" ] && [ -n "$COMMENT_ID" ]; then
+              echo "Deleting old comment ID: $COMMENT_ID"
+              gh api -X DELETE repos/${{ github.repository }}/issues/comments/$COMMENT_ID
+            fi
+          done
+          
+          echo "Creating new LOC comment..."
+          gh pr comment ${{ github.event.pull_request.number }} --body-file pr_loc_comment.md
