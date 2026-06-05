@@ -1,0 +1,125 @@
+[
+  {
+    "name": "happy_case_ryoshusho_mode1",
+    "description": "↔️ Update 領収書 thường (torokuHoho=1) — kingaku=yên, không field ngoại tệ, có thể áp sankasha template",
+    "body": {
+      "meisaiTemplateId": "MEISAITEMPLATE0000000000000001",
+      "updateVersion": 1,
+      "torokuHoho": "1",
+      "meisaiTemplateMei": "国内交通費テンプレート（更新）",
+      "naiyo": "電車代",
+      "bushoId": "BUSHO00000000000000000000001",
+      "projectId": "PROJECT0000000000000000000001",
+      "keihiKamokuId": "KEIHIKAMOKU000000000000000001",
+      "zeiKubunId": "ZEIKUBUN00000000000000000001",
+      "kashikataKanjoKamokuId": "KANJO000000000000000000000001",
+      "memo": "メモ更新",
+      "kingaku": 2500,
+      "sankashaTemplateId": "SANKASHA00000000000000000001",
+      "hyojiJun": 100
+    }
+  },
+  {
+    "name": "happy_case_gaika_mode5",
+    "description": "🆕 Update 領収書（外貨）(torokuHoho=5) — kingaku=ngoại tệ, rate, enKansanKingaku=yên (FE tự tính), có sankasha",
+    "body": {
+      "meisaiTemplateId": "MEISAITEMPLATE0000000000000002",
+      "updateVersion": 3,
+      "torokuHoho": "5",
+      "meisaiTemplateMei": "USD出張テンプレート（更新）",
+      "naiyo": "宿泊費",
+      "bushoId": "BUSHO00000000000000000000001",
+      "gaikaShuruiId": "GAIKA0000000000000000000000USD",
+      "kingaku": 120.00,
+      "rate": 152.0000,
+      "enKansanKingaku": 18240,
+      "keihiKamokuId": "KEIHIKAMOKU000000000000000001",
+      "kashikataKanjoKamokuId": "KANJO000000000000000000000001",
+      "sankashaTemplateId": "SANKASHA00000000000000000001",
+      "hyojiJun": 100
+    }
+  },
+  {
+    "name": "happy_case_rate_shomeisho_mode6",
+    "description": "🆕 Update 外貨レート証明書 (torokuHoho=6) — giống 領収書: kingaku=yên, enKansanKingaku/gaika/sankasha đều null",
+    "body": {
+      "meisaiTemplateId": "MEISAITEMPLATE0000000000000003",
+      "updateVersion": 1,
+      "torokuHoho": "6",
+      "meisaiTemplateMei": "レート証明書テンプレート（更新）",
+      "naiyo": "為替レート証明",
+      "bushoId": "BUSHO00000000000000000000001",
+      "kingaku": 600,
+      "kashikataKanjoKamokuId": "KANJO000000000000000000000001",
+      "hyojiJun": 100
+    }
+  },
+  {
+    "name": "validation_error_missing_update_keys",
+    "description": "↔️ thiếu meisaiTemplateId/updateVersion (GroupUpdate required) → 400",
+    "body": {
+      "torokuHoho": "1",
+      "meisaiTemplateMei": "キー不足テンプレート",
+      "kingaku": 2000
+    }
+  },
+  {
+    "name": "validation_error_mode5_missing_gaika_fields",
+    "description": "🆕 mode 5 thiếu gaikaShuruiId/rate/enKansanKingaku → 400 (GroupGaika required)",
+    "body": {
+      "meisaiTemplateId": "MEISAITEMPLATE0000000000000002",
+      "updateVersion": 3,
+      "torokuHoho": "5",
+      "meisaiTemplateMei": "外貨不足テンプレート",
+      "kingaku": 100.00
+    }
+  },
+  {
+    "name": "validation_error_mode6_with_gaika_fields",
+    "description": "🆕 mode 6 nhưng gửi kèm field ngoại tệ/sankasha → field bị clear NULL theo §4.3 (normalize)",
+    "body": {
+      "meisaiTemplateId": "MEISAITEMPLATE0000000000000003",
+      "updateVersion": 1,
+      "torokuHoho": "6",
+      "meisaiTemplateMei": "矛盾テンプレート",
+      "kingaku": 500,
+      "gaikaShuruiId": "GAIKA0000000000000000000000USD",
+      "rate": 150.0000,
+      "enKansanKingaku": 75000,
+      "sankashaTemplateId": "SANKASHA00000000000000000001"
+    }
+  },
+  {
+    "name": "business_error_optimistic_lock",
+    "description": "↔️ updateVersion không khớp DB → optimistic lock conflict (rollback)",
+    "body": {
+      "meisaiTemplateId": "MEISAITEMPLATE0000000000000001",
+      "updateVersion": 99,
+      "torokuHoho": "1",
+      "meisaiTemplateMei": "国内交通費テンプレート",
+      "kingaku": 2000
+    }
+  },
+  {
+    "name": "business_error_duplicate_name",
+    "description": "↔️ đổi sang tên đã tồn tại của template KHÁC (cùng user) → 400 E040",
+    "body": {
+      "meisaiTemplateId": "MEISAITEMPLATE0000000000000001",
+      "updateVersion": 1,
+      "torokuHoho": "1",
+      "meisaiTemplateMei": "既存の別テンプレート名",
+      "kingaku": 2000
+    }
+  },
+  {
+    "name": "business_error_not_found",
+    "description": "↔️ meisaiTemplateId không tồn tại / không phải owner / đã xóa → 404 E041",
+    "body": {
+      "meisaiTemplateId": "MEISAITEMPLATE0000000000099999",
+      "updateVersion": 1,
+      "torokuHoho": "1",
+      "meisaiTemplateMei": "存在しないテンプレート",
+      "kingaku": 2000
+    }
+  }
+]

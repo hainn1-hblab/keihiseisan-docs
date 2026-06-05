@@ -1,0 +1,108 @@
+[
+  {
+    "name": "success",
+    "description": "Update thành công (mọi mode) → I002",
+    "http_status": 200,
+    "body": {
+      "code": 0,
+      "type": "success",
+      "message": "更新が完了しました。"
+    }
+  },
+  {
+    "name": "error_validation_field",
+    "description": "Bean validation fail (vd thiếu meisaiTemplateId/updateVersion, mode 5 thiếu field ngoại tệ)",
+    "http_status": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "リクエストが不正です。",
+      "status": 400,
+      "path": "/api/v1/meisaiTemplate",
+      "timestamp": "2026-06-05 12:00:00",
+      "error": {
+        "meisaiTemplateId": "必須項目です。",
+        "updateVersion": "必須項目です。",
+        "gaikaShuruiId": "必須項目です。"
+      }
+    }
+  },
+  {
+    "name": "error_not_found",
+    "description": "↔️ bản ghi không tồn tại / không phải owner / đã xóa → E041",
+    "http_status": 404,
+    "body": {
+      "code": 4,
+      "type": "not_found",
+      "message": "指定された明細テンプレートIDは存在しません。",
+      "status": 404,
+      "path": "/api/v1/meisaiTemplate",
+      "timestamp": "2026-06-05 12:00:00"
+    }
+  },
+  {
+    "name": "error_gaika_disabled",
+    "description": "🆕 mode 5/6 nhưng công ty chưa bật ngoại tệ (gaikaRiyoUmu != 1) — bad_request (TBD-U2 RESOLVED)",
+    "http_status": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "リクエストが不正です。",
+      "status": 400,
+      "path": "/api/v1/meisaiTemplate",
+      "timestamp": "2026-06-05 12:00:00"
+    }
+  },
+  {
+    "name": "error_optimistic_lock",
+    "description": "↔️ updateVersion không khớp DB → optimistic lock conflict, rollback",
+    "http_status": 409,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "他のユーザーによって更新されています。再度確認してください。",
+      "status": 409,
+      "path": "/api/v1/meisaiTemplate",
+      "timestamp": "2026-06-05 12:00:00"
+    }
+  },
+  {
+    "name": "error_duplicate_name",
+    "description": "↔️ đổi sang tên trùng template khác trong phạm vi user → E040",
+    "http_status": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "既存の別テンプレート名は既に登録されています。",
+      "status": 400,
+      "path": "/api/v1/meisaiTemplate",
+      "timestamp": "2026-06-05 12:00:00"
+    }
+  },
+  {
+    "name": "error_keihi_kamoku_not_allow_ryoshusho",
+    "description": "↔️ mode 1/5: keihiKamoku có ryoshushoSentakuKanousei=0 → E157",
+    "http_status": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "経費科目名は領収書明細で選択できません。",
+      "status": 400,
+      "path": "/api/v1/meisaiTemplate",
+      "timestamp": "2026-06-05 12:00:00"
+    }
+  },
+  {
+    "name": "error_forbidden_role",
+    "description": "↔️ role không hợp lệ → 403",
+    "http_status": 403,
+    "body": {
+      "code": 3,
+      "type": "forbidden",
+      "message": "アクセス権限がありません。",
+      "status": 403,
+      "path": "/api/v1/meisaiTemplate",
+      "timestamp": "2026-06-05 12:00:00"
+    }
+  }
+]
