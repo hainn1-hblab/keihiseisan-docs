@@ -1,5 +1,5 @@
 ---
-version: 1.0.0
+version: 1.1.0
 status: draft
 last_updated: 2026-06-04
 related_spec: ./spec_analysis.md
@@ -137,12 +137,24 @@ Khi chọn `参加者テンプレートを適用する`, BE lưu gì vào templa
 hay copy snapshot danh sách người tham gia? Khi sankasha template bị xóa → meisai template xử lý thế nào
 (set null / giữ / báo lỗi)?
 
-**Trả lời**: xác nhận:  Khi chọn 参加者テンプレートを適用する, BE Chỉ lưu sankashaTemplateId vào template meisai. Khi sankasha template bị xóa → meisai template sẽ set null sankashaTemplateId, nhưng sẽ không xóa template meisai đi vì có thể vẫn dùng được như 1 template thông thường (không áp dụng template người tham gia).
+**Trả lời**: xác nhận:  Khi chọn 参加者テンプレートを適用する, BE Chỉ lưu sankashaTemplateId vào template meisai.
+
+> ⚠️ **CHANGED 2026-06-04 (FPM revise)** — phương án cascade khi xóa sankasha_template:
+> - ~~Phương án CŨ: set NULL `sankashaTemplateId` ở các meisai template tham chiếu.~~
+> - **Phương án MỚI (chốt): BLOCK xóa** `sankasha_template` nếu còn ≥1 `tm_meisai_template` (`delete_flag=0`) đang tham chiếu.
+>
+> **6.6.Q1 — Error message**: hiển thị dạng "{tên sankasha} đang được sử dụng trong meisai template, không xóa được".
+>   → Cần message key MỚI. **Lưu ý: E158 ĐÃ BỊ DÙNG** (`messages.properties:188`) → dùng **E180** (key trống tiếp theo).
+>   Đề xuất: `E180={0}は明細テンプレートで使用されているため、削除できません。` (PO/FE tinh chỉnh wording).
+> **6.6.Q2 — Scope**: áp cho **cả single delete VÀ bulk delete**. Bulk: nếu có ≥1 cái bị block → **fail toàn bộ** (atomic, không xóa cái nào).
+> **6.6.Q3 — Đếm**: chỉ count meisai template có `delete_flag=0` (đã soft delete = không tính).
+>
+> Impact: `SankashaTemplateService.deleteOne()`/`deleteList()` thêm pre-check; meisai-template final_spec §4.4 (TBD#3 RESOLVED); sankasha final_spec §4.9 (mới).
 
 **Người trả lời**: DucNA1
-**Ngày trả lời**: 2026-06-04
+**Ngày trả lời**: 2026-06-04 (revise cascade behaviour)
 **Nguồn**:
-**Impact**: logic add/update + FK behaviour (cột `sankasha_template_id`).
+**Impact**: logic delete sankasha (BLOCK) + FK behaviour (cột `sankasha_template_id`).
 
 ---
 
