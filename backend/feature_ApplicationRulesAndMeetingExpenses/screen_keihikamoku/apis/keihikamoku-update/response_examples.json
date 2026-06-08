@@ -1,0 +1,90 @@
+{
+  "_note": "Response examples cho PUT /api/v1/keihi-kamoku (updateKeihiKamoku). Success dùng I002.",
+
+  "success_200": {
+    "_desc": "Cập nhật thành công (I002)",
+    "http_status": 200,
+    "body": { "code": 0, "message": "更新しました。" }
+  },
+
+  "error_400_kingaku_required_E005": {
+    "_desc": "🆕 checkKubun=Error/Alert nhưng kingaku null/<=0",
+    "http_status": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "一人当たり上限金額は必須です。",
+      "status": 400,
+      "path": "/api/v1/keihi-kamoku",
+      "timestamp": "2026-06-08 10:00:00"
+    }
+  },
+
+  "error_400_standard_rename_E084": {
+    "_desc": "標準科目 đổi tên (regression)",
+    "http_status": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "標準科目「TM028...」の経費科目名は変更できません。",
+      "status": 400,
+      "path": "/api/v1/keihi-kamoku",
+      "timestamp": "2026-06-08 10:00:00"
+    }
+  },
+
+  "error_400_used_in_meisai_E152": {
+    "_desc": "Tắt cờ 選択可能性 (YES->NO) khi đang dùng meisai (regression)",
+    "http_status": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "「領収書」明細で使用されているため、変更できません。",
+      "status": 400,
+      "path": "/api/v1/keihi-kamoku",
+      "timestamp": "2026-06-08 10:00:00"
+    }
+  },
+
+  "error_400_not_found_E041": {
+    "_desc": "Record không tồn tại / đã xoá",
+    "http_status": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "「TM028...」は存在しません。",
+      "status": 400,
+      "path": "/api/v1/keihi-kamoku",
+      "timestamp": "2026-06-08 10:00:00"
+    }
+  },
+
+  "error_400_validation": {
+    "_desc": "🆕 Bean Validation fail field mới",
+    "http_status": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "リクエストが不正です。",
+      "status": 400,
+      "path": "/api/v1/keihi-kamoku",
+      "timestamp": "2026-06-08 10:00:00",
+      "error": {
+        "hitoriAtariJogenKingaku": "0〜99999の範囲で入力してください。"
+      }
+    }
+  },
+
+  "error_403_forbidden": {
+    "_desc": "Role không phải 5/6",
+    "http_status": 403,
+    "body": {
+      "code": 3,
+      "type": "forbidden",
+      "message": "権限がありません。",
+      "status": 403,
+      "path": "/api/v1/keihi-kamoku",
+      "timestamp": "2026-06-08 10:00:00"
+    }
+  }
+}

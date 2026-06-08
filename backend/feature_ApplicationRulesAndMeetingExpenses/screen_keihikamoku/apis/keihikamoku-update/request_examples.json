@@ -1,0 +1,101 @@
+{
+  "_note": "Examples cho PUT /api/v1/keihi-kamoku (updateKeihiKamoku) — EXTEND +8 field. Khác add: cần id + updateVersion.",
+
+  "happy_enable_participant": {
+    "_desc": "Bật participant + limit Error cho record có sẵn",
+    "id": "TM02800001202105190808080001",
+    "updateVersion": 3,
+    "keihiKamokuName": "会議費",
+    "code": "MTG001",
+    "karikataKanjokamoku": "TM03500001202105190808080001",
+    "riyoJotai": 1,
+    "hyojiJun": 100,
+    "ryoshushoTempuCheck": 0,
+    "memoCheck": 0,
+    "hiyoFutanBushoCheck": 0,
+    "projectCheck": 0,
+    "kingakuJogenCheck": 0,
+    "shinseiKakobiCheck": 0,
+    "ryoshushoSentakuKanousei": 1,
+    "keiroSentakuKanousei": 0,
+    "nittouSentakuKanousei": 0,
+    "kashikataKamokuSentakuKanousei": 1,
+    "zeikubunSentakuKanousei": 1,
+
+    "sankashaNyuryokuHitsuyoFlag": 1,
+    "hitoriAtariJogenKingaku": 10000,
+    "hitoriAtariJogenCheckKubun": 1,
+    "hitoriAtariJogenMessage": "一人当たり上限金額が10,000円を超えたため、接待交際費の経費科目を選択しなおしてください。",
+    "tashaSankashaNyuryokuFlag": 1,
+    "tashaSankashaHissuFlag": 1,
+    "jishaSankashaSentakuFlag": 1,
+    "jishaSankashaHissuFlag": 0
+  },
+
+  "happy_disable_master_keep_values": {
+    "_desc": "Tắt master (1->0) nhưng giữ giá trị cũ (Q6.3 — BE không reset)",
+    "id": "TM02800001202105190808080001",
+    "updateVersion": 4,
+    "keihiKamokuName": "会議費",
+    "karikataKanjokamoku": "TM03500001202105190808080001",
+    "riyoJotai": 1,
+    "ryoshushoTempuCheck": 0,
+    "memoCheck": 0,
+    "hiyoFutanBushoCheck": 0,
+    "projectCheck": 0,
+    "kingakuJogenCheck": 0,
+    "shinseiKakobiCheck": 0,
+    "sankashaNyuryokuHitsuyoFlag": 0,
+    "hitoriAtariJogenCheckKubun": 1,
+    "hitoriAtariJogenKingaku": 10000,
+    "tashaSankashaNyuryokuFlag": 1,
+    "tashaSankashaHissuFlag": 1
+  },
+
+  "happy_regression_no_new_fields": {
+    "_desc": "Regression: update record cũ, KHÔNG gửi 8 field mới",
+    "id": "TM02800001202105190808080099",
+    "updateVersion": 2,
+    "keihiKamokuName": "交通費",
+    "karikataKanjokamoku": "TM03500001202105190808080003",
+    "riyoJotai": 1,
+    "ryoshushoTempuCheck": 1,
+    "memoCheck": 0,
+    "hiyoFutanBushoCheck": 0,
+    "projectCheck": 0,
+    "kingakuJogenCheck": 0,
+    "shinseiKakobiCheck": 0
+  },
+
+  "error_kingaku_required": {
+    "_desc": "400 E005: checkKubun=Alert nhưng kingaku null",
+    "id": "TM02800001202105190808080001",
+    "updateVersion": 5,
+    "keihiKamokuName": "会議費",
+    "karikataKanjokamoku": "TM03500001202105190808080001",
+    "riyoJotai": 1,
+    "ryoshushoTempuCheck": 0,
+    "memoCheck": 0,
+    "hiyoFutanBushoCheck": 0,
+    "projectCheck": 0,
+    "kingakuJogenCheck": 0,
+    "shinseiKakobiCheck": 0,
+    "sankashaNyuryokuHitsuyoFlag": 1,
+    "hitoriAtariJogenCheckKubun": 2
+  },
+
+  "error_standard_kamoku_rename": {
+    "_desc": "400 E084: đổi tên 標準科目 (regression)",
+    "id": "TM02800001202105190808080010",
+    "updateVersion": 1,
+    "keihiKamokuName": "新しい名前",
+    "karikataKanjokamoku": "TM03500001202105190808080001",
+    "riyoJotai": 1,
+    "ryoshushoTempuCheck": 0,
+    "memoCheck": 0,
+    "hiyoFutanBushoCheck": 0,
+    "projectCheck": 0,
+    "kingakuJogenCheck": 0,
+    "shinseiKakobiCheck": 0
+  }
+}
