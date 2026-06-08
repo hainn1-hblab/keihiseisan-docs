@@ -1,0 +1,130 @@
+{
+  "_note": "Examples cho POST /api/v1/keihi-kamoku (addKeihiKamoku) — EXTEND +8 field 参加者入力/会議費. Field cũ giữ nguyên.",
+
+  "happy_meeting_expense_full": {
+    "_desc": "会議費 đầy đủ: bật người tham gia + limit/người Error + field đối tác + nội bộ",
+    "keihiKamokuName": "会議費",
+    "code": "MTG001",
+    "karikataKanjokamoku": "TM03500001202105190808080001",
+    "hojoKamoku": "TM03400001202105190808080001",
+    "zeikubun": "TM03000001202105190808080001",
+    "riyoJotai": 1,
+    "hyojiJun": 100,
+    "ryoshushoTempuCheck": 0,
+    "memoCheck": 0,
+    "hiyoFutanBushoCheck": 0,
+    "projectCheck": 0,
+    "kingakuJogenCheck": 0,
+    "shinseiKakobiCheck": 0,
+    "ryoshushoSentakuKanousei": 1,
+    "keiroSentakuKanousei": 0,
+    "nittouSentakuKanousei": 0,
+    "kashikataKamokuSentakuKanousei": 1,
+    "zeikubunSentakuKanousei": 1,
+
+    "sankashaNyuryokuHitsuyoFlag": 1,
+    "hitoriAtariJogenKingaku": 10000,
+    "hitoriAtariJogenCheckKubun": 1,
+    "hitoriAtariJogenMessage": "一人当たり上限金額が10,000円を超えたため、接待交際費の経費科目を選択しなおしてください。",
+    "tashaSankashaNyuryokuFlag": 1,
+    "tashaSankashaHissuFlag": 1,
+    "jishaSankashaSentakuFlag": 1,
+    "jishaSankashaHissuFlag": 1
+  },
+
+  "happy_alert_no_message": {
+    "_desc": "Limit dạng Alert, không nhập message (optional)",
+    "keihiKamokuName": "接待交際費",
+    "code": "ENT001",
+    "karikataKanjokamoku": "TM03500001202105190808080002",
+    "riyoJotai": 1,
+    "ryoshushoTempuCheck": 0,
+    "memoCheck": 0,
+    "hiyoFutanBushoCheck": 0,
+    "projectCheck": 0,
+    "kingakuJogenCheck": 0,
+    "shinseiKakobiCheck": 0,
+    "sankashaNyuryokuHitsuyoFlag": 1,
+    "hitoriAtariJogenKingaku": 5000,
+    "hitoriAtariJogenCheckKubun": 2,
+    "tashaSankashaNyuryokuFlag": 1,
+    "tashaSankashaHissuFlag": 0,
+    "jishaSankashaSentakuFlag": 1,
+    "jishaSankashaHissuFlag": 0
+  },
+
+  "happy_no_participant": {
+    "_desc": "Regression: mục chi phí thường, KHÔNG gửi 8 field mới -> default 0/null",
+    "keihiKamokuName": "交通費",
+    "code": "TRN001",
+    "karikataKanjokamoku": "TM03500001202105190808080003",
+    "riyoJotai": 1,
+    "ryoshushoTempuCheck": 1,
+    "memoCheck": 0,
+    "hiyoFutanBushoCheck": 0,
+    "projectCheck": 0,
+    "kingakuJogenCheck": 0,
+    "shinseiKakobiCheck": 0
+  },
+
+  "edge_checkkubun_none_with_kingaku": {
+    "_desc": "Defensive: check_kubun=0 nhưng gửi kingaku -> server reset kingaku=null",
+    "keihiKamokuName": "雑費",
+    "karikataKanjokamoku": "TM03500001202105190808080004",
+    "riyoJotai": 1,
+    "ryoshushoTempuCheck": 0,
+    "memoCheck": 0,
+    "hiyoFutanBushoCheck": 0,
+    "projectCheck": 0,
+    "kingakuJogenCheck": 0,
+    "shinseiKakobiCheck": 0,
+    "sankashaNyuryokuHitsuyoFlag": 1,
+    "hitoriAtariJogenCheckKubun": 0,
+    "hitoriAtariJogenKingaku": 8000
+  },
+
+  "error_kingaku_required": {
+    "_desc": "400 E005: check_kubun=Error nhưng kingaku null",
+    "keihiKamokuName": "会議費NG",
+    "karikataKanjokamoku": "TM03500001202105190808080005",
+    "riyoJotai": 1,
+    "ryoshushoTempuCheck": 0,
+    "memoCheck": 0,
+    "hiyoFutanBushoCheck": 0,
+    "projectCheck": 0,
+    "kingakuJogenCheck": 0,
+    "shinseiKakobiCheck": 0,
+    "sankashaNyuryokuHitsuyoFlag": 1,
+    "hitoriAtariJogenCheckKubun": 1
+  },
+
+  "error_kingaku_overlength": {
+    "_desc": "400 E004: kingaku 6 chữ số (> 99999)",
+    "keihiKamokuName": "会議費OVER",
+    "karikataKanjokamoku": "TM03500001202105190808080006",
+    "riyoJotai": 1,
+    "ryoshushoTempuCheck": 0,
+    "memoCheck": 0,
+    "hiyoFutanBushoCheck": 0,
+    "projectCheck": 0,
+    "kingakuJogenCheck": 0,
+    "shinseiKakobiCheck": 0,
+    "sankashaNyuryokuHitsuyoFlag": 1,
+    "hitoriAtariJogenCheckKubun": 1,
+    "hitoriAtariJogenKingaku": 100000
+  },
+
+  "error_flag_invalid_value": {
+    "_desc": "400 bad_request: cờ flag gửi 2 (ngoài 0/1)",
+    "keihiKamokuName": "会議費FLAG",
+    "karikataKanjokamoku": "TM03500001202105190808080007",
+    "riyoJotai": 1,
+    "ryoshushoTempuCheck": 0,
+    "memoCheck": 0,
+    "hiyoFutanBushoCheck": 0,
+    "projectCheck": 0,
+    "kingakuJogenCheck": 0,
+    "shinseiKakobiCheck": 0,
+    "sankashaNyuryokuHitsuyoFlag": 2
+  }
+}

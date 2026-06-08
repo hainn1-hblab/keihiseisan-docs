@@ -1,0 +1,13 @@
+=== Sheet: tm_keihi_kamoku ===  (15 x 12)
+Merged ranges: 0
+R1: [A1] Table ID | [B1] Table Name | [C1] Japanese Field Name | [D1] English Field Name | [E1] Physical Column | [F1] Data Type | [G1] Length | [H1] Nullable | [I1] Key | [J1] Default | [K1] Description | [L1] Index / Constraint
+R2: [A2] tm_keihi_kamoku | [B2] Expense Item | [C2] 参加者の入力が必要な経費科目 | [D2] Participant input required for this expense item | [E2] sankasha_nyuryoku_hitsuyo_flag | [F2] numeric | [G2] 1 | [H2] No | [J2] 0 | [K2] 0: Not required, 1: Required/used
+R3: [A3] tm_keihi_kamoku | [B3] Expense Item | [C3] 一人当たり上限金額 | [D3] Per-person amount limit | [E3] hitori_atari_jogen_kingaku | [F3] numeric | [G3] 11 | [H3] Yes | [K3] Amount limit per participant/person
+R4: [A4] tm_keihi_kamoku | [B4] Expense Item | [C4] 一人当たり上限金額超過時の種別 | [D4] Behavior when per-person amount exceeds limit | [E4] hitori_atari_jogen_check_kubun | [F4] numeric | [G4] 1 | [H4] No | [J4] 0.0 | [K4] 0: None 1: Error, 2: Alert
+R5: [A5] tm_keihi_kamoku | [B5] Expense Item | [C5] 一人当たり上限金額超過時のメッセージ | [D5] Message when per-person amount exceeds limit | [E5] hitori_atari_jogen_message | [F5] varchar | [G5] 1000 | [H5] Yes | [K5] Message displayed when the per-person limit is exceeded
+R6: [A6] tm_keihi_kamoku | [B6] Expense Item | [C6] 相手先会社名・参加者氏名の入力を行う | [D6] Enable external company/person participant fields | [E6] tasha_sankasha_nyuryoku_flag | [F6] numeric | [G6] 1 | [H6] No | [J6] 0 | [K6] 0: Hide/do not use, 1: Show/use external participant fields
+R7: [A7] tm_keihi_kamoku | [B7] Expense Item | [C7] 相手先会社名・参加者氏名を必須とする | [D7] External company/person participant fields required | [E7] tasha_sankasha_hissu_flag | [F7] numeric | [G7] 1 | [H7] No | [J7] 0 | [K7] 0: Optional, 1: Required
+R8: [A8] tm_keihi_kamoku | [B8] Expense Item | [C8] 自社参加者の選択を行う | [D8] Enable internal participant selection | [E8] jisha_sankasha_sentaku_flag | [F8] numeric | [G8] 1 | [H8] No | [J8] 0 | [K8] 0: Hide/do not use, 1: Show/use internal participant selection
+R9: [A9] tm_keihi_kamoku | [B9] Expense Item | [C9] 自社参加者の選択を必須とする | [D9] Internal participant selection required | [E9] jisha_sankasha_hissu_flag | [F9] numeric | [G9] 1 | [H9] No | [J9] 0 | [K9] 0: Optional, 1: Required
+
+--- rows with data: 9 ---

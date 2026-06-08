@@ -1,0 +1,43 @@
+=== Sheet: 02_Setting detail mục chi phí ===  (1002 x 26)
+Merged ranges: 0
+R1: [E1] マスタ設定 > 経費機能設定 > 経費科目マスタ
+R69: [T69] １．参加者の入力が必要な経費科目 | [Y69] Khoản mục chi phí cần nhập thông tin người tham gia sankasha_nyuryoku_hitsuyo_flag
+R70: [T70] Các mục chi phí cần nhập thông tin người tham gia
+R71: [T71] Khi checkbox này được check, các mục sau sẽ được kích hoạt (enable):
+R72: [T72] Trường nhập 一人当たり上限金額 (số tiền tối đa cho mỗi người) hitori_atari_jogen_kingaku
+R73: [T73] Radio button error(エラー )/ alert(アラート) hitori_atari_jogen_check_kubun (1 error(エラー )/ 2  alert(アラート)
+R74: [T74] giống với setting Alert / Error
+R75: [T75] dùng để thiết lập loại lỗi của 明細
+R76: [T76] 2.一人当たり上限金額 | [X76] Số tiền tối đa cho mỗi người (hitori_atari_jogen_kingaku)
+R77: [T77] Giới hạn số tiền cho mỗi người | [X77] maxlength : 5
+R78: [T78] Thông thường:
+R79: [T79] 会議費 = 10,000円 | [W79] Chi phí cuộc họp = 10,000 円
+R80: [T80] Nếu không có limit → để trống
+R81: [T81] Message cũng có thể để trống | [Z81] trường lưu mess: hitori_atari_jogen_message
+R82: [T82] Ví dụ message:
+R83: [T83] 一人当たり上限金額が10,000円を超えたため、
+R84: [T84] 接待交際費の経費科目を選択しなおしてください。
+R85: [T85] Ý nghĩa:
+R86: [T86] Khi vượt 10,000 yen/người, hãy đổi sang mục chi phí tiếp khách
+R87: [T87] Tức là hệ thống không tự đổi mục chi phí, mà để người dùng tự quyết định.
+R88: [T88] ※
+R94: [T94] 3.Check box:  明細作成時 (Khi tạo chi tiết (明細))、相手先会社名、相手先参加者氏名の入力　（,nhập tên công ty đối tác và tên người tham gia phía đối tác.（）
+R95: [T95] Khi tạo meisai, hiển thị các field: -> checkbox(input field có đc hiển thị lên UI hay không?)
+R96: [T96] Field | [W96] trường lưu checkbox 3: tasha_sankasha_nyuryoku_flag
+R97: [T97] 相手先会社名 : Tên công ty đối tác
+R98: [T98] 相手先参加者氏名 : Tên người tham gia của đối tác
+R99: [T99] 4.Check box:  明細作成時 (Khi tạo chi tiết (明細))、相手先会社名、相手先参加者氏名の入力を必須とする　（ việc nhập tên công ty đối tác và tên người tham gia phía đối tác là bắt buộc.）
+R100: [T100] Nếu check option này: -> checkbox(nếu đc hiển thị thì có require nhập hay không)? -> check thì require, ko check ko reuire(cho phép null)
+R101: [T101] hai field trên bắt buộc nhập | [X101] trường lưu checkbox 4: tasha_sankasha_hissu_flag
+R102: [T102] Mục đích:
+R103: [T103] đảm bảo có thông tin đối tác.
+R104: [T104] 5. Check box: 明細作成時(Khi tạo chi tiết (明細),)、自社参加者の選択( chọn người tham gia phía công ty mình.)
+R105: [T105] Hiển thị danh sách nhân viên nội bộ. | [X105] checkbox 5: (hiển thị ng tham giá phía cty mình hay không?)
+R106: [X106] trường lưu checkbox 5: jisha_sankasha_sentaku_flag
+R107: [T107] 6. Checkbox 6 : 明細作成時( khi tạo chi tiết meisai)、自社参加者の選択を必須とする( Việc nhập tên người tham gia thuộc công ty là bắt buộc)
+R108: [T108] Nếu check:
+R109: [T109] Phải chọn Nhân viên công ty tham gia
+R111: [X111] checkbox6: (khi đc hiển thị thì có reuiqre hay không?
+R112: [X112] trường lưu checkbox 6: jisha_sankasha_hissu_flag
+
+--- rows with data: 39 ---

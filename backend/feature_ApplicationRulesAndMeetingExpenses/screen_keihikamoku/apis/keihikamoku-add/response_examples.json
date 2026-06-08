@@ -1,0 +1,110 @@
+{
+  "_note": "Response examples cho POST /api/v1/keihi-kamoku (addKeihiKamoku). Success dùng ApiUtil.makeSimpleResponse(I001).",
+
+  "success_200": {
+    "_desc": "Thêm thành công (I001)",
+    "http_status": 200,
+    "body": {
+      "code": 0,
+      "message": "登録しました。"
+    }
+  },
+
+  "error_403_forbidden": {
+    "_desc": "Role không phải 5/6",
+    "http_status": 403,
+    "body": {
+      "code": 3,
+      "type": "forbidden",
+      "message": "権限がありません。",
+      "status": 403,
+      "path": "/api/v1/keihi-kamoku",
+      "timestamp": "2026-06-08 10:00:00"
+    }
+  },
+
+  "error_400_duplicate_name_E040": {
+    "_desc": "Trùng tên 経費科目 (E040)",
+    "http_status": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "「会議費」は既に登録されています。(経費科目名)",
+      "status": 400,
+      "path": "/api/v1/keihi-kamoku",
+      "timestamp": "2026-06-08 10:00:00"
+    }
+  },
+
+  "error_400_hitori_kingaku_required_E005": {
+    "_desc": "🆕 check_kubun=Error/Alert nhưng kingaku null/<=0 (E005)",
+    "http_status": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "一人当たり上限金額は必須です。",
+      "status": 400,
+      "path": "/api/v1/keihi-kamoku",
+      "timestamp": "2026-06-08 10:00:00"
+    }
+  },
+
+  "error_400_validation_E004_E002": {
+    "_desc": "🆕 Bean Validation fail cho field mới (kingaku > 99999 / message > 1000)",
+    "http_status": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "リクエストが不正です。",
+      "status": 400,
+      "path": "/api/v1/keihi-kamoku",
+      "timestamp": "2026-06-08 10:00:00",
+      "error": {
+        "hitoriAtariJogenKingaku": "0〜99999の範囲で入力してください。",
+        "hitoriAtariJogenMessage": "1000文字以内で入力してください。"
+      }
+    }
+  },
+
+  "error_400_flag_invalid": {
+    "_desc": "🆕 Cờ flag gửi giá trị ngoài 0/1",
+    "http_status": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "リクエストが不正です。",
+      "status": 400,
+      "path": "/api/v1/keihi-kamoku",
+      "timestamp": "2026-06-08 10:00:00",
+      "error": {
+        "sankashaNyuryokuHitsuyoFlag": "不正なリクエストです。"
+      }
+    }
+  },
+
+  "error_400_fk_not_found_E037": {
+    "_desc": "FK (勘定科目/税区分) không tồn tại (E037) — regression",
+    "http_status": 400,
+    "body": {
+      "code": 1,
+      "type": "bad_request",
+      "message": "「TM035...」は存在しません。(借方勘定科目)",
+      "status": 400,
+      "path": "/api/v1/keihi-kamoku",
+      "timestamp": "2026-06-08 10:00:00"
+    }
+  },
+
+  "error_500_internal": {
+    "_desc": "IOException khi save",
+    "http_status": 500,
+    "body": {
+      "code": 6,
+      "type": "internal_server_error",
+      "message": "システムエラーが発生しました。",
+      "status": 500,
+      "path": "/api/v1/keihi-kamoku",
+      "timestamp": "2026-06-08 10:00:00"
+    }
+  }
+}
