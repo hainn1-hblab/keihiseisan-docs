@@ -1,0 +1,135 @@
+{
+  "_note": "Examples cho POST /api/v1/shinsei-form (addShinseiForm) — EXTEND. Field cũ rút gọn, tập trung 7 nhóm 申請ルールの設定.",
+
+  "happy_full_with_all_rules": {
+    "_desc": "Tạo mới: bật cả 4 seigen + nhập trần tiền + 外貨機能 ON & rate ON",
+    "shinseiFormName": "出張申請フォーム",
+    "shinseiFormCode": "FORM01",
+    "formShurui": "0",
+    "workflowId": "WF0000000000000000000000001",
+    "keihiMeisaiTempu": 1,
+    "keihiMeisaiShoninTokiToriatsukai": 1,
+    "formRiyo": 1,
+    "hyojiJun": 100,
+    "kijunHi": 10,
+
+    "ryoshushoMeisaiTempuKanou": 1,
+    "keiroMeisaiTempuKanou": 1,
+    "nittouMeisaiTempuKanou": 1,
+    "ryoshushoGaikaMeisaiTempuKanou": 1,
+    "gaikaRateShomeishoTempuKanou": 1,
+
+    "keihiKamokuSeigenFlag": 1,
+    "keihiKamokuList": [
+      { "keihiKamokuId": "KK00000000000000000000000001", "hyojiJun": 100 },
+      { "keihiKamokuId": "KK00000000000000000000000002", "hyojiJun": 200 }
+    ],
+
+    "shinseiGokeiKingakuJogen": 1000000,
+    "shinseiGokeiJogenCheckKubun": 1,
+
+    "workflowHenkoKanouFlag": 1,
+
+    "bushoSeigenFlag": 1,
+    "bushoKaiKaisoFukumuFlag": 1,
+    "bushoList": [
+      { "bushoId": "BS00000000000000000000000001", "hyojiJun": 100 }
+    ],
+
+    "yakushokuSeigenFlag": 1,
+    "yakushokuList": [
+      { "yakushokuId": "YK00000000000000000000000001", "hyojiJun": 100 }
+    ],
+
+    "jugyoinSeigenFlag": 1,
+    "jugyoinList": [
+      { "jugyoinId": "JG00000000000000000000000001", "hyojiJun": 100 }
+    ],
+
+    "customizeKomokuDtos": []
+  },
+
+  "happy_no_restriction": {
+    "_desc": "Tạo mới: không bật seigen nào, không trần tiền (như form hiện tại + nhóm 1 default)",
+    "shinseiFormName": "通常経費申請",
+    "workflowId": "WF0000000000000000000000001",
+    "keihiMeisaiTempu": 1,
+    "keihiMeisaiShoninTokiToriatsukai": 1,
+    "formRiyo": 1,
+    "ryoshushoMeisaiTempuKanou": 1,
+    "keiroMeisaiTempuKanou": 1,
+    "nittouMeisaiTempuKanou": 1,
+    "ryoshushoGaikaMeisaiTempuKanou": 0,
+    "gaikaRateShomeishoTempuKanou": 0,
+    "keihiKamokuSeigenFlag": 0,
+    "shinseiGokeiKingakuJogen": null,
+    "shinseiGokeiJogenCheckKubun": 1,
+    "workflowHenkoKanouFlag": 0,
+    "bushoSeigenFlag": 0,
+    "yakushokuSeigenFlag": 0,
+    "jugyoinSeigenFlag": 0,
+    "customizeKomokuDtos": []
+  },
+
+  "edge_seigen_busho_empty_list": {
+    "_desc": "bushoSeigenFlag=1 nhưng bushoList rỗng → HỢP LỆ (clar 6.8 = không giới hạn theo busho)",
+    "shinseiFormName": "部署制限フォーム",
+    "workflowId": "WF0000000000000000000000001",
+    "keihiMeisaiTempu": 1,
+    "bushoSeigenFlag": 1,
+    "bushoList": [],
+    "keihiKamokuSeigenFlag": 0,
+    "customizeKomokuDtos": []
+  },
+
+  "validation_error_keihi_kamoku_required": {
+    "_desc": "keihiKamokuSeigenFlag=1 nhưng keihiKamokuList rỗng → 400 error.shinseiForm.keihiKamoku.required",
+    "shinseiFormName": "科目制限フォーム",
+    "workflowId": "WF0000000000000000000000001",
+    "keihiKamokuSeigenFlag": 1,
+    "keihiKamokuList": [],
+    "customizeKomokuDtos": []
+  },
+
+  "validation_error_meisai_type_mismatch": {
+    "_desc": "keihiKamokuSeigenFlag=1; 科目 KK..02 có ryoshushoGaikaSentakuKanousei=有 nhưng form ryoshushoGaikaMeisaiTempuKanou=0 → 400 meisaiTypeMismatch",
+    "shinseiFormName": "不整合フォーム",
+    "workflowId": "WF0000000000000000000000001",
+    "ryoshushoMeisaiTempuKanou": 1,
+    "keiroMeisaiTempuKanou": 1,
+    "nittouMeisaiTempuKanou": 1,
+    "ryoshushoGaikaMeisaiTempuKanou": 0,
+    "gaikaRateShomeishoTempuKanou": 0,
+    "keihiKamokuSeigenFlag": 1,
+    "keihiKamokuList": [
+      { "keihiKamokuId": "KK00000000000000000000000002" }
+    ],
+    "customizeKomokuDtos": []
+  },
+
+  "validation_error_jogen_zero": {
+    "_desc": "shinseiGokeiKingakuJogen = 0 → 400 (E004, @Range min=1)",
+    "shinseiFormName": "上限ゼロ",
+    "workflowId": "WF0000000000000000000000001",
+    "shinseiGokeiKingakuJogen": 0,
+    "keihiKamokuSeigenFlag": 0,
+    "customizeKomokuDtos": []
+  },
+
+  "update_create_new_version": {
+    "_desc": "Update form đã có (gửi shinseiFormId + updateVersion) → INSERT version mới + list con gắn version mới",
+    "shinseiFormId": "SF00000000000000000000000001",
+    "updateVersion": 1,
+    "shinseiFormName": "出張申請フォーム",
+    "workflowId": "WF0000000000000000000000001",
+    "keihiKamokuSeigenFlag": 1,
+    "keihiKamokuList": [
+      { "keihiKamokuId": "KK00000000000000000000000001" }
+    ],
+    "bushoSeigenFlag": 0,
+    "yakushokuSeigenFlag": 0,
+    "jugyoinSeigenFlag": 0,
+    "customizeKomokuDtos": []
+  }
+}
+</content>

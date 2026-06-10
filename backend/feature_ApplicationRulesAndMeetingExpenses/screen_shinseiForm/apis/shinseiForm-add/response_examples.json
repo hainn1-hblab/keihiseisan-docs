@@ -1,0 +1,119 @@
+{
+  "_note": "Examples response cho POST /api/v1/shinsei-form (addShinseiForm). POST trả detail ShinseiForm; PUT trả ModelApiResponse.",
+
+  "success_post_200": {
+    "_desc": "POST thành công — trả detail bản version mới nhất + 13 flag + 4 list con (enrich tên)",
+    "shinseiFormId": "SF00000000000000000000000001",
+    "shinseiFormVersion": 1,
+    "hojinCode": "00001",
+    "shinseiFormName": "出張申請フォーム",
+    "shinseiFormCode": "FORM01",
+    "formShurui": "0",
+    "workflowId": "WF0000000000000000000000001",
+    "workflowName": "標準ワークフロー",
+    "keihiMeisaiTempu": 1,
+    "keihiMeisaiShoninTokiToriatsukai": 1,
+    "formRiyo": 1,
+    "hyojiJun": 100,
+    "kijunHi": 10,
+    "deleteFlag": 0,
+    "updateVersion": 1,
+
+    "ryoshushoMeisaiTempuKanou": 1,
+    "keiroMeisaiTempuKanou": 1,
+    "nittouMeisaiTempuKanou": 1,
+    "ryoshushoGaikaMeisaiTempuKanou": 1,
+    "gaikaRateShomeishoTempuKanou": 1,
+    "keihiKamokuSeigenFlag": 1,
+    "shinseiGokeiKingakuJogen": 1000000,
+    "shinseiGokeiJogenCheckKubun": 1,
+    "workflowHenkoKanouFlag": 1,
+    "bushoSeigenFlag": 1,
+    "bushoKaiKaisoFukumuFlag": 1,
+    "yakushokuSeigenFlag": 1,
+    "jugyoinSeigenFlag": 1,
+
+    "keihiKamokuList": [
+      { "keihiKamokuId": "KK00000000000000000000000001", "keihiKamokuCode": "K001", "keihiKamokuName": "旅費交通費", "hyojiJun": 100 },
+      { "keihiKamokuId": "KK00000000000000000000000002", "keihiKamokuCode": "K002", "keihiKamokuName": "会議費", "hyojiJun": 200 }
+    ],
+    "bushoList": [
+      { "bushoId": "BS00000000000000000000000001", "bushoMei": "営業部", "hyojiJun": 100 }
+    ],
+    "yakushokuList": [
+      { "yakushokuId": "YK00000000000000000000000001", "yakushokuName": "課長", "hyojiJun": 100 }
+    ],
+    "jugyoinList": [
+      { "jugyoinId": "JG00000000000000000000000001", "jugyoinBango": "0000000001", "jugyoinShimei": "山田太郎", "hyojiJun": 100 }
+    ],
+
+    "customizeKomokuDtos": []
+  },
+
+  "success_put_200": {
+    "_desc": "PUT thành công — ModelApiResponse",
+    "code": 0,
+    "message": "更新が完了しました。"
+  },
+
+  "error_400_keihi_kamoku_required": {
+    "code": 1,
+    "type": "bad_request",
+    "message": "経費科目を1件以上選択してください。",
+    "status": 400,
+    "path": "/api/v1/shinsei-form",
+    "timestamp": "2026-06-10 10:00:00",
+    "error": { "keihiKamokuList": "error.shinseiForm.keihiKamoku.required" }
+  },
+
+  "error_400_meisai_type_mismatch": {
+    "code": 1,
+    "type": "bad_request",
+    "message": "選択した経費科目の明細種類が、添付可能な明細の種類と一致しません。",
+    "status": 400,
+    "path": "/api/v1/shinsei-form",
+    "timestamp": "2026-06-10 10:00:00",
+    "error": { "keihiKamokuList": "error.shinseiForm.keihiKamoku.meisaiTypeMismatch" }
+  },
+
+  "error_400_validation_jogen": {
+    "code": 1,
+    "type": "bad_request",
+    "message": "入力値が不正です。",
+    "status": 400,
+    "path": "/api/v1/shinsei-form",
+    "timestamp": "2026-06-10 10:00:00",
+    "error": { "shinseiGokeiKingakuJogen": "1から99999999999までの値を入力してください。" }
+  },
+
+  "error_400_duplicate_name": {
+    "code": 1,
+    "type": "bad_request",
+    "message": "申請フォーム名「出張申請フォーム」は既に存在します。",
+    "status": 400,
+    "path": "/api/v1/shinsei-form",
+    "timestamp": "2026-06-10 10:00:00",
+    "error": {}
+  },
+
+  "error_403_forbidden": {
+    "code": 3,
+    "type": "forbidden",
+    "message": "権限がありません。",
+    "status": 403,
+    "path": "/api/v1/shinsei-form",
+    "timestamp": "2026-06-10 10:00:00",
+    "error": {}
+  },
+
+  "error_404_workflow_not_found": {
+    "code": 4,
+    "type": "not_found",
+    "message": "ワークフローID「WF...」が見つかりません。",
+    "status": 404,
+    "path": "/api/v1/shinsei-form",
+    "timestamp": "2026-06-10 10:00:00",
+    "error": {}
+  }
+}
+</content>

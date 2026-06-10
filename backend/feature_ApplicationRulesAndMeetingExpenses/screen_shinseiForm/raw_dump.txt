@@ -1,0 +1,70 @@
+[COMMENT @ A197]: ======
+ID#AAAB8oRLz98
+HangVT (Carrot_)    (2026-06-01 09:14:38)
+@duongnv2@hblab.vn  anh note rõ câu này giúp em ạ, em chưa hiểu lắm ạ
+A1=●申請フォーム詳細画面 | H1=マスタ設定 > 経費機能設定 > 申請フォーム設定
+A2=画面イメージの下部に詳細な説明があります
+AB63=lọc theo hoặc à?
+A123=申請フォーム詳細設定
+A125=1. Các loại meisai đính kèm | E125=１．添付可能な明細の種類
+B126=Có các ô check box với từng loại meisai
+B127=Trong trường hợp shinsei form cho phép đính kèm meisai , thì các mục liên quan sẽ hiển thị
+B128=Khi mở màn tạo mới , tất cả các mục meisai sẽ được chọn mặc định ( tất cả các check box đều được check)( tất cả các dữ liệu đã tồn tại đều ở trạng thái check on)
+B129=Mục ryoushusho (ngoại tệ)  chỉ được hiển thị khi chức năng xử lý ngoại tệ (外貨機能) được bật
+B130=Mục chứng minh tỷ giá ngoại tệ(外貨レート証明書) được hiển thị khi chức năng xử lý ngoại tệ được bật và người nộp đơn có quyền thay đổi tỷ giá
+E131=Flow : 基本設定 | N131=shinseishaRateNyuryoku trong setting Kaisha
+F132=↓ | T132=setting rate off thì chỉ hiện thị 3 cái, rate on thì 5 cái 
+E133=   外貨機能 | T133=tk5: rate được bật && người nộp đơn : hiển thị 5 cái
+E134=                ↓ | T134=rate được bật && người nộp đơn ko oke: hiển thị 4 cái 
+D135=               申請者レート変更可能
+F136=↓
+E137=   明細種類表示制御
+A141=2. Các mục keihi có thể shinsei | E141=２．申請可能な経費科目
+B142=Trong trường hợp muốn giới hạn các loại chi phí có thể sử dụng trong shinsei form này , hãy đánh dấu checkbox và chọn các loại chi phí tương ứng
+B143=Ở mục " 申請可能な経費科目を設定する " không được tích checkbox thì button " + 経費科目追 " và khu vực hiển thị danh sách sẽ bị disable
+B144=Ngược lại nếu mục " 申請可能な経費科目を設定する " được tích check box thì button " + 経費科目追 " và khu vực hiển thị danh sách sẽ được enable
+B145=Phần hiển thị danh sách mục chi phí  và nut " + 経費科目追 " cần được triển khai theo cùng cách với phần chọn người approve trong 承認ルート詳細画面( Detail approve root)
+B146=Khi nhân nút " + 経費科目追 " , một modal sẽ mở ra hiển thị danh sách đơn giản các mục chi phí , Những mục chi phí được chọn trong modal sẽ được hiển thị tại khu vực hiển thị mục chi phí
+B148=Các mục tìm kiếm của modal bao gồm : Name, code, tài khoản ghi nợ(借方勘定科目）, mục ghi nợ (借方補助科目), tài khoản ghi có（貸方勘定科目）, mục ghi có(貸方補助科目）
+B149=Các mục hiển thị trong list : check box, name , code , tài khoản ghi nợ, mục ghi nợ, tài khoản ghi có, mục ghi có（貸方勘定科目）
+B150=Trong danh sach, các mục chi phí có trạng thái sử dụng là : 使用する（đang sử dụng) và phù hợp với loại meisai có thể đính kèm sẽ được tìm kiếm và hiển thị
+N151=đính kèm ở đây là meisai đc phép đính kèm vs shinseiform đó để đi tạo shinsei?
+A152=3. Giới hạn của tổng số tiền shinsei | F152=３．申請合計金額の上限
+B154=Default của input là chưa nhập gì ( Data đã tồn tại cũng thế)
+B155=Length 11 ký tự
+B156=Không được nhập giá trị là 0
+B157=Giá trị có thể nhập là từ 1 trở lên, và khi tạo shinsei hệ thống sẽ thực hiện kiểm tra điều kiện này
+B158=Trường hợp không nhập, không đi đến xử lý check giới hạn của số tiền
+B159=trường hợp nhập giá trị từ 1 trở lên, Nếu tổng số tiền của shinsei vượt quá hạn mức được thiết lập thì  shinsei sẽ được xử lý báo lỗi ( không thể shinsei ) hoặc cảnh báo
+A161=4. Người shinsei có thể thay đổi workFlow | G161=４．申請者がワークフローも変更可能
+B162=Giá trị default là chưa check
+B163=Trường này chỉ được hiển thị khi tùy chọn " ワークフロー変更をON,OFFできる " trong phần cài đặt giới hạn đang ở trạng thái ON
+A165=5 . Cấu hình các phòng ban được phép sử dụng shinsei form | I165=５．申請可能な部署を設定する
+B167=Khi check , có thể cấu hình các phòng ban mà người nộp đơn thuộc về và được phép sử dụng shinsei form này
+B168=Trường hợp checkbox " 申請可能な部署を設定する " được chọn thì checkbox "下位階層を含む" và button " ＋部署追加 " sẽ được enable
+B169=Trường hợp checkbox " 申請可能な部署を設定する " không được chọn thì checkbox "下位階層を含む" và button " ＋部署追加 " sẽ bị disable
+B170=trường hợp có check vào checkbox [下位階層を含む] thì toàn bộ busho cấp dưới đều được dùng shinsei form để shinsei
+B171=trường hợp không check vào checkbox [下位階層を含む] thì chỉ user thuộc đúng busho được chọn mới shinei được
+B173=Khi click button " ＋部署追加 " sẽ hiển thị modal để tìm kiếm và lựa chọn busho
+B174=Hiển thị list busho
+B175=Tương tự như chức năng chọn mục chi phí, phần này cũng cần được triển khai dựa trên modal người approve của màn hình chi tiết approve root
+B176=Ý nghĩa: Các nhân viên thuộc phòng ban được chọn sẽ được phép sử dụng shinseiform này 
+A178=6.0 | B178=Cấu hình chức vụ được phép sử dụng shinsei form | I178=６．申請可能な役職を設定する
+B179=Khi check, có thể cấu hình chức vụ mà người nộp đơn thuộc về và được phép sử dụng shinsei form này
+B180=Trường hợp checkbox " 申請可能な役職を設定する" được chọn thì button " +役職追加" được enable
+B181=Trường hợp checkbox " 申請可能な役職を設定する" không được chọn thì button " +役職追加" bị disable
+B183=Khi click button " +役職追加" sẽ hiển thị modal để tìm kiếm và lựa chọn chức vụ
+B184=Có thể tìm kiếm code, Name
+B185=Tương tự như chức năng chọn mục chi phí, phần này cũng cần được triển khai dựa trên modal người approve của màn hình chi tiết approve root
+B186=Ý nghĩa: Các nhân viên thuộc chức vụ này thì sẽ được phép sử dụng shinseiform này 
+A188=7.0 | B188=Cấu hình nhân viên được phép sử dụng shinsei form | I188=７．申請可能な従業員を設定する
+B190=Khi check , có thể cấu hình nhân viên mà người nộp đơn thuộc về và được phép sử dụng shinsei form này
+B191=Trường hợp checkbox " 申請可能な従業員を設定する" đượcchọn thì checkbox button " ＋従業員追加" sẽ được enable( ngược lại thì bị disable)
+B193=Khi click button " ＋従業員追加" sẽ hiển thị modal để tìm kiếm và lựa chọn nhân viên
+B194=Modal này được thực hiên giống modal chọn người approve trong màn hình approve root nhưng dữ liệu tìm kiếm sẽ là các nhân viên có thể thực hiện shinsei
+B195=Ý nghĩa: các nhân viên(ngoại lệ) được chọn ở đây sẽ có thể được sử dụng shinseiform này 
+A197=Khi tạo mới hay update hệ thống phải thiết lập xem 選択可能性 của mục chi phí theo từng loại meisai có phù hợp với thiết lập 添付可能な明細の種類 hay không
+B198=Khi đăng ký mới hoặc cập nhật, cần kiểm tra xem thiết lập của KeihiKamoku có thống nhất hay không giữa:
+C199=các loại Meisai mà KeihiKamoku có thể được chọn ( Ở màn detail KeihiKamoku)
+C200=các loại meisai được phép đính kèm '( mục 1 ở màn tạo shinsei form)
+A202=Trong màn hình tạo shinsei người nộp đơn chỉ có thể tạo shinsei bằng các shinsei form đã được lọc theo các điều kiện quy định ở mục 5,6,7
