@@ -1,10 +1,10 @@
 ---
-version: 1.2.0
+version: 1.3.0
 status: implemented
 api_name: SankashaTemplateSearch
 http_method: POST
 endpoint: /api/v1/sankasha-template/search
-last_updated: 2026-06-02
+last_updated: 2026-06-11
 based_on_final_spec_version: 1.2.1
 based_on_clarifications_version: 1.1.0
 ---
@@ -110,7 +110,7 @@ Xem [`request_examples.json`](./request_examples.json). Tóm tắt:
       "updateVersion": 1,
       "shosaiList": [
         { "sankashaKubun": 1, "aitesakiKaishaName": "HBLAB株式会社", "aitesakiSankashaName": "経費 太郎", "hyojiJun": 1 },
-        { "sankashaKubun": 2, "jishaSankashaJugyoinId": "TM00700001...", "jishaSankashaName": "経費 花子", "jishaSankashaInvalid": false, "hyojiJun": 2 }
+        { "sankashaKubun": 2, "jishaSankashaJugyoinId": "TM00700001...", "jishaSankashaName": "経費 花子", "jugyoinBango": "0000000001", "shimei": "経費 花子", "jishaSankashaInvalid": false, "hyojiJun": 2 }
       ]
     }
   ]
@@ -122,6 +122,7 @@ Xem [`request_examples.json`](./request_examples.json). Tóm tắt:
 - Cột **相手先会社名・氏名** = ghép `aitesakiKaishaName + " " + aitesakiSankashaName` cho mỗi shosai `kubun=1`.
 - Cột **自社参加者名** = `jishaSankashaName` cho mỗi shosai `kubun=2`.
 - **✅ CHỐT #S1**: trả nguyên `shosaiList` per template (đã enrich `jishaSankashaName`), **FE tự lọc theo kubun** và render multi-line — **nhất quán với model get-by-id**, dùng lại `SankashaTemplate`. (Không trả 2 list string riêng.)
+- 🆕 **DIFF — enrich thông tin nhân viên (kubun=2)**: mỗi shosai `kubun=2` enrich thêm `jugyoinBango` (従業員番号) và `shimei` (氏名) của nhân viên trong hệ thống, lấy từ `JugyoinDto.getJugyoinBango()` / `getShimei()` trong cùng batch query `findMapByJugyoinIds` (không phát sinh query mới). `jishaSankashaName` vẫn giữ (= `shimei`) để tương thích ngược.
 
 | Field (pagination) | Type | Nguồn |
 |---|---|---|
@@ -262,7 +263,7 @@ WHERE t.hojinCode = :hojinCode
 | Repository (detail) | `TmSankashaTemplateShosaiRepository` | 🆕 `findByHojinCodeAndSankashaTemplateIdInAndDeleteFlag(...)` (batch enrich; dùng chung get-by-id nếu gộp) |
 | Domain DTO | 🆕 `SankashaTemplateSearchParamDto extends SearchParamDto` (`sankashaTemplateName`, `aitesakiName`, `jishaSankashaName`) | ✅ đã tạo |
 | API model | 🆕 `SankashaTemplateSearchParameter extends SearchParameter` | ✅ đã tạo. Response dùng **`ListResponse<SankashaTemplate>`** generic có sẵn (KHÔNG tạo `ListSankashaTemplate`) — #S6 |
-| API model (response field bổ sung) | `SankashaTemplate` (+`sankashaTemplateId`, `updateVersion`), `SankashaTemplateShosai` (+`sankashaTemplateShosaiId`, `jishaSankashaName`, `jishaSankashaInvalid`) | ✅ thêm field additive |
+| API model (response field bổ sung) | `SankashaTemplate` (+`sankashaTemplateId`, `updateVersion`), `SankashaTemplateShosai` (+`sankashaTemplateShosaiId`, `jishaSankashaName`, `jugyoinBango`, `shimei`, `jishaSankashaInvalid`) | ✅ thêm field additive |
 
 > Reference impl search owner-scoped + paging + Object[]/JOIN: `MeisaiTemplateService.search`, `MeisaiTemplateAdapter.search` / `.viewListMeisaiTemplate`, `TmMeisaiTemplateRepository.search` / `.searchSimple`.
 
@@ -414,6 +415,11 @@ Thêm vào `api_interface_generate_tool/specification/openapi.yml`.
 ---
 
 ## Version History
+
+### [1.3.0] - 2026-06-11
+- **Enrich thêm thông tin nhân viên hệ thống cho shosai kubun=2**: response trả thêm `jugyoinBango` (従業員番号) và `shimei` (氏名) lấy từ `JugyoinDto`, trong cùng batch query enrich (không thêm query). Cập nhật §3.1, §6, OpenAPI schema `SankashaTemplateShosai`.
+- Field thêm additive — tương thích ngược (`jishaSankashaName` vẫn giữ = `shimei`).
+- Logic enrich dùng chung với get-by-id (`enrichShosaiList`) → get-by-id cũng trả 2 field này.
 
 ### [1.2.0] - 2026-06-02
 - **Đồng bộ với code đã implement** (BUILD SUCCESS), status → `implemented`.

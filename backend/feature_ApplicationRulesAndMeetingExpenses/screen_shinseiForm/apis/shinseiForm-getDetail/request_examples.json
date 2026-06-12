@@ -1,0 +1,22 @@
+{
+  "_note": "GET /api/v1/shinsei-form/{shinseiFormId}?shinseiFormVersion={version}. Không có request body — chỉ path + query param.",
+
+  "get_latest_version": {
+    "_desc": "Lấy version mới nhất (không truyền shinseiFormVersion)",
+    "method": "GET",
+    "path": "/api/v1/shinsei-form/SF00000000000000000000000001"
+  },
+
+  "get_specific_version": {
+    "_desc": "Lấy đúng 1 version cụ thể (バージョン選択 trên màn)",
+    "method": "GET",
+    "path": "/api/v1/shinsei-form/SF00000000000000000000000001?shinseiFormVersion=2"
+  },
+
+  "get_not_found": {
+    "_desc": "ID không tồn tại trong bushokaisoPtn của user → 404 E041",
+    "method": "GET",
+    "path": "/api/v1/shinsei-form/SF00000000000000000000000099"
+  }
+}
+</content>

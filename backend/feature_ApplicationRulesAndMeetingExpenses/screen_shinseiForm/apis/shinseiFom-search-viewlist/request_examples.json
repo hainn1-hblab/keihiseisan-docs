@@ -1,0 +1,51 @@
+{
+  "_note": "Examples cho POST /shinsei-form/search (admin, role 5,6) và POST /shinsei-form/view-list (5 role). Cùng body ShinseiFormSearchParameter. Khác biệt EXTEND = thêm jugyoinId.",
+
+  "search_admin_no_jugyoin": {
+    "_desc": "Màn quản lý master: KHÔNG truyền jugyoinId → hành vi cũ (lọc theo bushokaisoPtnId của login user)",
+    "shinseiFormName": "",
+    "shinseiFormCode": "",
+    "shinseiTitle": "",
+    "workflowId": "",
+    "formRiyo": 1,
+    "page": 1,
+    "size": 20,
+    "sortParameters": [
+      { "sortField": "hyojiJun", "sortDirection": "asc" }
+    ]
+  },
+
+  "viewlist_with_jugyoin": {
+    "_desc": "Màn tạo申請: truyền jugyoinId → BE trả các form nhân viên đó được phép dùng (busho/yakushoku/jugyoin, OR)",
+    "jugyoinId": "JG00000000000000000000000001",
+    "page": 1,
+    "size": 50,
+    "sortParameters": [
+      { "sortField": "hyojiJun", "sortDirection": "asc" }
+    ]
+  },
+
+  "viewlist_with_jugyoin_and_keyword": {
+    "_desc": "Lọc theo quyền + thêm keyword tên form",
+    "jugyoinId": "JG00000000000000000000000001",
+    "shinseiFormName": "出張",
+    "formRiyo": 1,
+    "page": 1,
+    "size": 20
+  },
+
+  "search_admin_with_jugyoin_optional": {
+    "_desc": "Admin vẫn có thể truyền jugyoinId để xem form khả dụng cho 1 nhân viên cụ thể (clar 6.7 — jugyoinId có → luôn filter)",
+    "jugyoinId": "JG00000000000000000000000009",
+    "page": 1,
+    "size": 20
+  },
+
+  "validation_error_jugyoin_format": {
+    "_desc": "jugyoinId sai độ dài (≠29) → 400 bad_request",
+    "jugyoinId": "JG-INVALID",
+    "page": 1,
+    "size": 20
+  }
+}
+</content>

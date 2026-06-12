@@ -28,6 +28,8 @@
               "sankashaKubun": 2,
               "jishaSankashaJugyoinId": "TM00700001202401010900xxAB",
               "jishaSankashaName": "経費 花子",
+              "jugyoinBango": "0000000001",
+              "shimei": "経費 花子",
               "jishaSankashaInvalid": false,
               "hyojiJun": 2
             }
@@ -46,6 +48,8 @@
               "sankashaKubun": 2,
               "jishaSankashaJugyoinId": "TM00700001202401010900xxEF",
               "jishaSankashaName": "経費 次郎",
+              "jugyoinBango": "0000000002",
+              "shimei": "経費 次郎",
               "jishaSankashaInvalid": false,
               "hyojiJun": 1
             }

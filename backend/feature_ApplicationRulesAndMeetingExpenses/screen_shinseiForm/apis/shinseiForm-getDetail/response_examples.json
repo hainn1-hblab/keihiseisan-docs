@@ -1,0 +1,109 @@
+{
+  "_note": "Response GET /shinsei-form/{id}: 1 object ShinseiForm. EXTEND = +13 flag + 4 list con đã enrich tên (theo đúng version).",
+
+  "success_200_full_detail": {
+    "_desc": "Form có đủ 申請ルール + 4 list con (enrich tên)",
+    "shinseiFormId": "SF00000000000000000000000002",
+    "shinseiFormVersion": 3,
+    "hojinCode": "00001",
+    "shinseiFormName": "出張申請（営業部）",
+    "shinseiFormCode": "FORM02",
+    "shinseiTitle": "${申請者名}_出張",
+    "kijunHi": 10,
+    "formShurui": "0",
+    "workflowId": "WF0000000000000000000000002",
+    "workflowName": "出張用ワークフロー",
+    "keihiMeisaiTempu": 1,
+    "keihiMeisaiShoninTokiToriatsukai": 1,
+    "formRiyo": 1,
+    "hyojiJun": 200,
+    "deleteFlag": 0,
+    "updateVersion": 1,
+
+    "ryoshushoMeisaiTempuKanou": 1,
+    "keiroMeisaiTempuKanou": 1,
+    "nittouMeisaiTempuKanou": 1,
+    "ryoshushoGaikaMeisaiTempuKanou": 0,
+    "gaikaRateShomeishoTempuKanou": 0,
+    "keihiKamokuSeigenFlag": 1,
+    "shinseiGokeiKingakuJogen": 1000000,
+    "shinseiGokeiJogenCheckKubun": 1,
+    "workflowHenkoKanouFlag": 1,
+    "bushoSeigenFlag": 1,
+    "bushoKaiKaisoFukumuFlag": 1,
+    "yakushokuSeigenFlag": 1,
+    "jugyoinSeigenFlag": 0,
+
+    "keihiKamokuList": [
+      { "shinseiFormKeihiKamokuId": "TM06700001...", "keihiKamokuId": "KK00000000000000000000000001", "keihiKamokuCode": "K001", "keihiKamokuName": "旅費交通費", "hyojiJun": 100 },
+      { "shinseiFormKeihiKamokuId": "TM06700002...", "keihiKamokuId": "KK00000000000000000000000002", "keihiKamokuCode": "K002", "keihiKamokuName": "会議費", "hyojiJun": 200 }
+    ],
+    "bushoList": [
+      { "shinseiFormBushoId": "TM06800001...", "bushoId": "BS00000000000000000000000001", "bushoMei": "営業部", "hyojiJun": 100 }
+    ],
+    "yakushokuList": [
+      { "shinseiFormYakushokuId": "TM06900001...", "yakushokuId": "YK00000000000000000000000001", "yakushokuName": "課長", "hyojiJun": 100 }
+    ],
+    "jugyoinList": [],
+
+    "customizeNames": [],
+    "customizeKomokus": [],
+    "jugyoinShozokuBushos": [
+      { "bushoId": "BS00000000000000000000000001", "bushoMei": "営業部", "yakushokuId": "YK00000000000000000000000001", "yakushokuName": "課長" }
+    ],
+    "jugyoinBango": "0000000001",
+    "jugyoinShimei": "山田太郎"
+  },
+
+  "success_200_old_form_no_rules": {
+    "_desc": "Form cũ chưa có 申請ルール: flag = default, 4 list rỗng (regression)",
+    "shinseiFormId": "SF00000000000000000000000001",
+    "shinseiFormVersion": 1,
+    "shinseiFormName": "通常経費申請",
+    "workflowId": "WF0000000000000000000000001",
+    "workflowName": "標準ワークフロー",
+    "keihiMeisaiTempu": 1,
+    "formRiyo": 1,
+    "hyojiJun": 100,
+    "deleteFlag": 0,
+    "ryoshushoMeisaiTempuKanou": 1,
+    "keiroMeisaiTempuKanou": 1,
+    "nittouMeisaiTempuKanou": 1,
+    "ryoshushoGaikaMeisaiTempuKanou": 0,
+    "gaikaRateShomeishoTempuKanou": 0,
+    "keihiKamokuSeigenFlag": 0,
+    "shinseiGokeiKingakuJogen": null,
+    "shinseiGokeiJogenCheckKubun": 1,
+    "workflowHenkoKanouFlag": 0,
+    "bushoSeigenFlag": 0,
+    "bushoKaiKaisoFukumuFlag": 0,
+    "yakushokuSeigenFlag": 0,
+    "jugyoinSeigenFlag": 0,
+    "keihiKamokuList": [],
+    "bushoList": [],
+    "yakushokuList": [],
+    "jugyoinList": [],
+    "customizeKomokus": []
+  },
+
+  "error_404_not_found": {
+    "code": 4,
+    "type": "not_found",
+    "message": "申請フォームID「SF...99」が見つかりません。",
+    "status": 404,
+    "path": "/api/v1/shinsei-form/SF00000000000000000000000099",
+    "timestamp": "2026-06-10 10:00:00",
+    "error": {}
+  },
+
+  "error_403_forbidden": {
+    "code": 3,
+    "type": "forbidden",
+    "message": "権限がありません。",
+    "status": 403,
+    "path": "/api/v1/shinsei-form/SF00000000000000000000000001",
+    "timestamp": "2026-06-10 10:00:00",
+    "error": {}
+  }
+}
+</content>
