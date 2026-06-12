@@ -41,7 +41,7 @@ curl -X POST "http://localhost:8080/api/v1/sankasha-template" \
   -d '{
     "sankashaTemplateName": "○○社用",
     "sankaNinzu": 4,
-    "memo": "他2名",
+    "memoSankasha": "他2名",
     "hyojiJun": 100,
     "shosaiList": [
       { "sankashaKubun": 1, "aitesakiKaishaName": "HBLAB株式会社", "aitesakiSankashaName": "経費 太郎", "hyojiJun": 1 },
@@ -59,7 +59,7 @@ curl.exe -X POST "http://localhost:8080/api/v1/sankasha-template" `
   --data-raw '{
     "sankashaTemplateName": "○○社用",
     "sankaNinzu": 4,
-    "memo": "他2名",
+    "memoSankasha": "他2名",
     "hyojiJun": 100,
     "shosaiList": [
       { "sankashaKubun": 1, "aitesakiKaishaName": "HBLAB株式会社", "aitesakiSankashaName": "経費 太郎", "hyojiJun": 1 },
@@ -85,7 +85,7 @@ curl -X POST "http://localhost:8080/api/v1/sankasha-template" \
   -d '{
     "sankashaTemplateName": "社内会議テンプレート",
     "sankaNinzu": 3,
-    "memo": null,
+    "memoSankasha": null,
     "hyojiJun": 50,
     "shosaiList": [
       { "sankashaKubun": 2, "jishaSankashaJugyoinId": "TM00700001202401010900xxAB", "hyojiJun": 1 },
@@ -98,7 +98,7 @@ curl -X POST "http://localhost:8080/api/v1/sankasha-template" \
 
 ---
 
-## 3. Min required — chỉ field bắt buộc (default hyojiJun/sankaNinzu/memo)
+## 3. Min required — chỉ field bắt buộc (default hyojiJun/sankaNinzu/memoSankasha)
 ```bash
 curl -X POST "http://localhost:8080/api/v1/sankasha-template" \
   -H "Content-Type: application/json" \

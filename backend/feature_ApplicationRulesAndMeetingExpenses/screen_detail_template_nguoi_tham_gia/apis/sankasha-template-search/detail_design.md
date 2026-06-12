@@ -1,10 +1,10 @@
 ---
-version: 1.3.0
+version: 1.4.0
 status: implemented
 api_name: SankashaTemplateSearch
 http_method: POST
 endpoint: /api/v1/sankasha-template/search
-last_updated: 2026-06-11
+last_updated: 2026-06-12
 based_on_final_spec_version: 1.2.1
 based_on_clarifications_version: 1.1.0
 ---
@@ -105,7 +105,7 @@ Xem [`request_examples.json`](./request_examples.json). Tóm tắt:
       "sankashaTemplateId": "TM06500001202601010900xxAB",
       "sankashaTemplateName": "○○社用",
       "sankaNinzu": 4,
-      "memo": "他2名",
+      "memoSankasha": "他2名",
       "hyojiJun": 100,
       "updateVersion": 1,
       "shosaiList": [

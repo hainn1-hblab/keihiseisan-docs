@@ -1,7 +1,7 @@
 ---
-version: 1.4.0
+version: 1.5.0
 status: ready-for-implementation
-last_updated: 2026-06-04
+last_updated: 2026-06-12
 based_on_spec_analysis_version: 1.0.0
 based_on_clarifications_version: 1.1.1
 unresolved_questions_count: 0
@@ -55,7 +55,7 @@ Có 2 màn hình:
 | 4 | 参加人数 | Số người tham gia | `sanka_ninzu` |
 | 5 | 相手先会社名・氏名 | DS multi-line: `相手先会社名 + " " + 相手先参加者名` cho mỗi shosai có `sankasha_kubun = 1` | Join shosai |
 | 6 | 自社参加者名 | DS multi-line: `jugyoin_name` cho mỗi shosai có `sankasha_kubun = 2` | Join shosai → 従業員 |
-| 7 | 自社参加者メモ | Memo template-level | `tm_sankasha_template.memo` |
+| 7 | 自社参加者メモ | Memo template-level | `tm_sankasha_template.memo_sankasha` |
 | 8 | 表示順 | Số thứ tự hiển thị | `tm_sankasha_template.hyoji_jun` |
 
 ### 2.3 Action buttons
@@ -90,7 +90,7 @@ Layout & UI behavior: xem mockup `images/image_A10.png`.
 | F4 | `+` | Nút cộng cho cặp (F3, F3b) | Button | — | — | Thêm cặp input mới. **Max 100 cặp**. Đạt giới hạn → disable nút | — |
 | F5 | 自社参加者 | Người tham gia thuộc công ty | Dropdown (chỉ tên nhân viên) | — | (trống) | Danh sách = tất cả `tm_jugyoin` của `hojin_code` hiện tại, **không filter theo phòng ban** của user lập đơn, **trừ** những nhân viên có `Roles.NO_RIGHT` (value = 1) — xem 4.3 | `jisha_sankasha_jugyoin_id` (FK → `tm_jugyoin`) |
 | F6 | `+` | Nút cộng cho F5 | Button | — | — | Thêm 1 dropdown mới. **Max 100 dòng**. Đạt giới hạn → disable nút | — |
-| F7 | 自社参加者メモ | Memo template | Text input | — | (trống) | Kiểu `text` (không giới hạn ký tự cứng ở DB). ⚠️ **TBD** việc cho xuống dòng (xem section 7) | `tm_sankasha_template.memo` (text) |
+| F7 | 自社参加者メモ | Memo template | Text input | — | (trống) | Kiểu `text` (không giới hạn ký tự cứng ở DB). ⚠️ **TBD** việc cho xuống dòng (xem section 7) | `tm_sankasha_template.memo_sankasha` (text) |
 | F8 | 表示順 | Số thứ tự hiển thị | Number input | — | `100` | Numeric 4 chữ số, **cho phép từ 0** (`0 ≤ x ≤ 9999`). Áp default `100` theo convention dự án | `hyoji_jun` (numeric 4) |
 
 ### 3.2 Action buttons
@@ -279,7 +279,7 @@ và [`apis/sankasha-template-bulk-delete/detail_design.md`](./apis/sankasha-temp
 | `sanka_ninzu` | numeric | 3 | Yes | `0.0` | — | Number of participants (参加人数). Allowed value: 1–999 khi > 0 |
 | `hyoji_jun` | numeric | 4 | Yes | `100` | — | Display/sort order (表示順) |
 | `delete_flag` | numeric | 1 | Yes | (không có trong file thiết kế) | — | Logical delete flag (削除フラグ) |
-| `memo` | text | — | Yes | (không có trong file thiết kế) | — | 自社参加者メモ — **bổ sung spec mới** theo ghi chú trong file thiết kế |
+| `memo_sankasha` | text | — | Yes | (không có trong file thiết kế) | — | 自社参加者メモ — **bổ sung spec mới** theo ghi chú trong file thiết kế |
 
 **Cột audit bắt buộc thêm (file thiết kế ghi rõ "Thiếu các cột sau"):**
 
@@ -370,7 +370,7 @@ và [`apis/sankasha-template-bulk-delete/detail_design.md`](./apis/sankasha-temp
 
 | # | Điểm TBD | Assumption tạm | Severity | Câu hỏi gốc | Cần PO trả lời trước |
 |---|---|---|---|---|---|
-| 2 | **(6.7)** `自社参加者メモ` (`tm_sankasha_template.memo`) có cho xuống dòng (multi-line) không? | Cho phép xuống dòng vì DB kiểu `text`. FE render `<textarea>` thay vì `<input>`. | **Low** | `clarifications.md` mục 6.7 (cột "Cho xuống dòng" của hàng `自社参加者メモ` còn `?`) | Trước UAT |
+| 2 | **(6.7)** `自社参加者メモ` (`tm_sankasha_template.memo_sankasha`) có cho xuống dòng (multi-line) không? | Cho phép xuống dòng vì DB kiểu `text`. FE render `<textarea>` thay vì `<input>`. | **Low** | `clarifications.md` mục 6.7 (cột "Cho xuống dòng" của hàng `自社参加者メモ` còn `?`) | Trước UAT |
 | 3 | **(6.14)** Danh sách cột list được phép sort | Backend support sort theo mọi cột physical của `tm_sankasha_template` (`sankasha_template_name`, `sanka_ninzu`, `hyoji_jun`). FE chốt sort UI sau. | **Low** | `clarifications.md` mục 6.14 (table bên trong còn `?`) | Trước UAT |
 | 5 | (mới) `tm_sankasha_template` cần thêm `update_version` (optimistic lock) theo convention dự án — file thiết kế xlsx không có. | Bổ sung `update_version NUMBER(4) defaultValueNumeric="1"` trong Liquibase changeset. | **Low** | (phát sinh từ convention) | Trước khi merge changeset đầu tiên |
 | 6 | (mới) `tm_sankasha_template_shosai` cần thêm `delete_flag` + `update_version` theo convention — file thiết kế không có. | Soft delete shosai có thể bỏ qua (vì save = replace all shosai). Nhưng vẫn nên có 2 cột này theo convention. Bổ sung trong Liquibase. | **Low** | (phát sinh từ convention) | Trước khi merge changeset đầu tiên |
@@ -410,6 +410,15 @@ và [`apis/sankasha-template-bulk-delete/detail_design.md`](./apis/sankasha-temp
 ---
 
 ## Version History
+
+### [1.5.0] - 2026-06-12
+
+- **Rename field `memo` → `memo_sankasha` trong `tm_sankasha_template`** (làm rõ field gắn với participant):
+  - DB column: `memo` → `memo_sankasha` (§2 mapping, §3.1 F7, §5.x schema).
+  - JSON API contract (request/response): `memo` → `memoSankasha` — **breaking change cho FE**.
+  - Nhãn tiếng Nhật `自社参加者メモ` giữ nguyên (display name).
+  - Đồng bộ TBD §7 (clarification 6.7).
+- Minor bump (đổi field name + API contract; nghiệp vụ không đổi).
 
 ### [1.4.0] - 2026-06-04
 

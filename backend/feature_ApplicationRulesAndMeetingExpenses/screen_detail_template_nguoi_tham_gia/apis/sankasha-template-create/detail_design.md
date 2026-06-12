@@ -1,10 +1,10 @@
 ---
-version: 1.1.0
+version: 1.2.0
 status: implemented
 api_name: SankashaTemplateCreate
 http_method: POST
 endpoint: /api/v1/sankasha-template
-last_updated: 2026-06-02
+last_updated: 2026-06-12
 based_on_final_spec_version: 1.2.1
 based_on_clarifications_version: 1.1.0
 ---
@@ -56,7 +56,7 @@ Authorization: Bearer <JWT access token (Keycloak, bearer-only)>
 |---|---|---|---|---|---|
 | `sankashaTemplateName` | string | ✅ | `@NotBlank`, `@Size(max=250)` | Tên template (参加者テンプレート名) | `sankasha_template_name` |
 | `sankaNinzu` | integer | ❌ | nullable; nếu != null và != 0 → range `[1, 999]` | Số người tham gia (参加人数). Cho phép `0` (= không nhập) | `sanka_ninzu` |
-| `memo` | string | ❌ | không giới hạn length cứng (DB type `text`) | Memo (自社参加者メモ) | `memo` |
+| `memoSankasha` | string | ❌ | không giới hạn length cứng (DB type `text`) | Memo (自社参加者メモ) | `memo_sankasha` |
 | `hyojiJun` | integer | ❌ | range `[0, 9999]` (cho phép 0); default `100` nếu không truyền | Thứ tự hiển thị (表示順) | `hyoji_jun` |
 | `shosaiList` | array<SankashaTemplateShosai> | ❌ | **KHÔNG bắt buộc** (cho phép rỗng/null); ràng buộc count theo kubun khi có (xem §4.2) | Danh sách người tham gia (external + internal) | → `tm_sankasha_template_shosai` |
 
@@ -80,7 +80,7 @@ Xem file [`request_examples.json`](./request_examples.json) — phần tử `hap
 {
   "sankashaTemplateName": "○○社用",
   "sankaNinzu": 4,
-  "memo": "他2名",
+  "memoSankasha": "他2名",
   "hyojiJun": 100,
   "shosaiList": [
     { "sankashaKubun": 1, "aitesakiKaishaName": "HBLAB株式会社", "aitesakiSankashaName": "経費 太郎", "hyojiJun": 1 },
@@ -177,7 +177,7 @@ SankashaTemplateApiController.addSankashaTemplate(SankashaTemplate)
 - `sankashaTemplateName`: `@NotBlank`, `@Size(max = 250)`.
 - `sankaNinzu`: nullable. Nếu != null và != 0 → range `[1, 999]` (validate ở business layer vì là conditional — `@Min/@Max` không biểu diễn được điều kiện "0 được phép"; xem note dưới).
 - `hyojiJun` (header & shosai): range `[0, 9999]` (cho phép 0); default 100 (header) / 1 (shosai) nếu null.
-- `memo`: KHÔNG validate length cứng (DB `text`).
+- `memoSankasha`: KHÔNG validate length cứng (DB `text`).
 - `shosaiList`: **KHÔNG bắt buộc** (bỏ `@NotEmpty`) — cho phép rỗng/null. Service normalize null → empty list.
 - `shosaiList[].sankashaKubun`: `@NotNull` (chỉ áp khi có phần tử).
 
@@ -339,7 +339,7 @@ Thêm vào `api_interface_generate_tool/specification/openapi.yml`.
           type: integer
           format: int32
           example: 4
-        memo:
+        memoSankasha:
           type: string
           example: 他2名
         hyojiJun:

@@ -1,10 +1,10 @@
 ---
-version: 1.1.0
+version: 1.2.0
 status: implemented
 api_name: SankashaTemplateUpdate
 http_method: PUT
 endpoint: /api/v1/sankasha-template/{id}
-last_updated: 2026-06-02
+last_updated: 2026-06-12
 based_on_final_spec_version: 1.2.1
 based_on_clarifications_version: 1.1.0
 ---
@@ -63,7 +63,7 @@ Authorization: Bearer <JWT access token (Keycloak, bearer-only)>
 |---|---|---|---|---|---|
 | `sankashaTemplateName` | string | ✅ | `@NotBlank`, `@Size(max=250)` | Tên template (参加者テンプレート名) | `sankasha_template_name` |
 | `sankaNinzu` | integer | ❌ | nullable; nếu != null và != 0 → range `[1, 999]` | Số người tham gia (参加人数). Cho phép `0` | `sanka_ninzu` |
-| `memo` | string | ❌ | không giới hạn length cứng (DB type `text`) | Memo (自社参加者メモ) | `memo` |
+| `memoSankasha` | string | ❌ | không giới hạn length cứng (DB type `text`) | Memo (自社参加者メモ) | `memo_sankasha` |
 | `hyojiJun` | integer | ❌ | range `[0, 9999]` (cho phép 0); default `100` nếu không truyền | Thứ tự hiển thị (表示順) | `hyoji_jun` |
 | `updateVersion` | integer | ✅ 🆕 | `@NotNull` | **Optimistic lock** — version client đang giữ. Phải khớp version DB hiện tại, không thì 409/conflict (xem §4.5) | `update_version` (`@Version`) |
 | `shosaiList` | array<SankashaTemplateShosai> | ❌ | **KHÔNG bắt buộc** (cho phép rỗng/null); ràng buộc count theo kubun khi có (§4.2 create) | Danh sách người tham gia **MỚI** — thay thế toàn bộ list cũ (§4.6). Rỗng → xoá hết shosai cũ, không insert dòng nào | → `tm_sankasha_template_shosai` |
@@ -82,7 +82,7 @@ Xem file [`request_examples.json`](./request_examples.json) — phần tử `hap
 {
   "sankashaTemplateName": "○○社用（改）",
   "sankaNinzu": 3,
-  "memo": "メンバー差し替え",
+  "memoSankasha": "メンバー差し替え",
   "hyojiJun": 100,
   "updateVersion": 1,
   "shosaiList": [
@@ -155,7 +155,7 @@ SankashaTemplateApiController.updateSankashaTemplate(id, SankashaTemplate)
                        getByName(hojinCode, loginJugyoinId, name, delete_flag=0);
                        nếu found && found.id != id → E040/400                  ★ DIFF
                     7. ★ copy field header MỚI vào record đã đọc (existing):
-                       existing.setSankashaTemplateName / sankaNinzu / memo / hyojiJun(default 100)
+                       existing.setSankashaTemplateName / sankaNinzu / memoSankasha / hyojiJun(default 100)
                        existing.setUpdateVersion(dto.updateVersion)  ← optimistic lock ★ DIFF
                        (KHÔNG đổi jugyoin_id, hojin_code, delete_flag, sankasha_template_id)
                     8. ★ REPLACE shosai (final_spec §4.6, §4.4):                ★ DIFF
@@ -191,7 +191,7 @@ SankashaTemplateApiController.updateSankashaTemplate(id, SankashaTemplate)
 - `hyojiJun`: range `[0, 9999]` (cho phép 0).
 - `shosaiList`: **KHÔNG bắt buộc** (bỏ `@NotEmpty`) — cho phép rỗng/null.
 
-Phần còn lại (`sankashaTemplateName`, `sankaNinzu`, `memo`, `sankashaKubun`) — **giống hệt create** (xem [create §4.2](../sankasha-template-create/detail_design.md#42-validation-chi-tiết)).
+Phần còn lại (`sankashaTemplateName`, `sankaNinzu`, `memoSankasha`, `sankashaKubun`) — **giống hệt create** (xem [create §4.2](../sankasha-template-create/detail_design.md#42-validation-chi-tiết)).
 
 **Cấp business (Service layer)** — giống create:
 - Đếm riêng theo kubun: `count(kubun==1) ≤ 100` **VÀ** `count(kubun==2) ≤ 100` (KHÔNG check tổng 200). `shosaiList` rỗng → count = 0 → hợp lệ.

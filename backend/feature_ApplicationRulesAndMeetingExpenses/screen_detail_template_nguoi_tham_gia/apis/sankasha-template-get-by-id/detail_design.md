@@ -1,10 +1,10 @@
 ---
-version: 1.2.0
+version: 1.3.0
 status: implemented
 api_name: SankashaTemplateGetById
 http_method: GET
 endpoint: /api/v1/sankasha-template/{id}
-last_updated: 2026-06-02
+last_updated: 2026-06-12
 based_on_final_spec_version: 1.2.1
 based_on_clarifications_version: 1.1.0
 ---
@@ -69,7 +69,7 @@ Không có (GET).
   "sankashaTemplateId": "TM06500001202601010900xxAB",
   "sankashaTemplateName": "○○社用",
   "sankaNinzu": 4,
-  "memo": "他2名",
+  "memoSankasha": "他2名",
   "hyojiJun": 100,
   "updateVersion": 1,
   "shosaiList": [

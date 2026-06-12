@@ -12,7 +12,7 @@
           "sankashaTemplateId": "TM06500001202601010900xxAB",
           "sankashaTemplateName": "○○社用",
           "sankaNinzu": 4,
-          "memo": "他2名",
+          "memoSankasha": "他2名",
           "hyojiJun": 100,
           "updateVersion": 1,
           "shosaiList": [
@@ -39,7 +39,7 @@
           "sankashaTemplateId": "TM06500001202601010900xxBC",
           "sankashaTemplateName": "△△社用",
           "sankaNinzu": 2,
-          "memo": null,
+          "memoSankasha": null,
           "hyojiJun": 100,
           "updateVersion": 3,
           "shosaiList": [

@@ -10,6 +10,23 @@ Format dựa trên [Keep a Changelog](https://keepachangelog.com/), versioning t
 
 ---
 
+## [1.5.0] - 2026-06-12
+
+### Changed
+- **Rename field `memo` → `memo_sankasha` trong `tm_sankasha_template`** (làm rõ field gắn với participant).
+  - DB column: `memo` → `memo_sankasha` (Liquibase changeset `20260612_tm_sankasha_template_rename_column_memo_to_memo_sankasha`).
+  - Java property: `memo` → `memoSankasha` (Entity, DTO, API model, Service).
+  - JSON API contract (request/response): `memo` → `memoSankasha` — **breaking change cho FE**.
+  - OpenAPI spec + message key `SankashaTemplateDto.memoSankasha`.
+  - Updated: final_spec.md (§ mapping/schema/TBD), all detail_design.md (create/update/get/search), request/response examples, fe_integration_guide, curl_example.
+  - Nhãn tiếng Nhật `自社参加者メモ` GIỮ NGUYÊN (display name).
+- **Version bump:** final_spec.md → v1.5.0; create/update detail_design.md → v1.2.0; get-by-id → v1.3.0; search → v1.4.0.
+
+### Source
+- Yêu cầu nội bộ đổi tên field cho rõ nghĩa (2026-06-12).
+
+---
+
 ## [1.4.0] - 2026-06-04
 
 ### Changed

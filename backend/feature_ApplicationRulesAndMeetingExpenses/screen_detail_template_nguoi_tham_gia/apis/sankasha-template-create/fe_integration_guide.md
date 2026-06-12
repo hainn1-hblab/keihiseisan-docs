@@ -42,7 +42,7 @@ Request gồm **1 header** + **1 mảng `shosaiList`** (danh sách người tham
 {
   "sankashaTemplateName": "○○社用",   // bắt buộc
   "sankaNinzu": 4,                      // optional
-  "memo": "他2名",                      // optional
+  "memoSankasha": "他2名",              // optional
   "hyojiJun": 100,                      // optional
   "shosaiList": [ /* >= 1 phần tử */ ]  // bắt buộc
 }
@@ -54,7 +54,7 @@ Request gồm **1 header** + **1 mảng `shosaiList`** (danh sách người tham
 |---|---|---|---|---|
 | `sankashaTemplateName` | string | ✅ | không rỗng, **tối đa 250 ký tự** | Tên template (参加者テンプレート名) |
 | `sankaNinzu` | integer | ❌ | `0` (= chưa nhập) **hoặc** `1`–`999`. **KHÔNG** chấp nhận số âm / > 999 | Số người tham gia (参加人数) |
-| `memo` | string | ❌ | không giới hạn độ dài | Ghi chú (自社参加者メモ) |
+| `memoSankasha` | string | ❌ | không giới hạn độ dài | Ghi chú (自社参加者メモ) |
 | `hyojiJun` | integer | ❌ | `0`–`9999` (cho phép 0). Bỏ trống → server set `100` | Thứ tự hiển thị (表示順) |
 | `shosaiList` | array | ❌ | **KHÔNG bắt buộc** — cho phép rỗng (template không có người tham gia). Xem ràng buộc số lượng ở §2.4 | Danh sách người tham gia |
 
@@ -101,7 +101,7 @@ Với `kubun = 2`: `jishaSankashaJugyoinId` phải là nhân viên **đang hoạ
 {
   "sankashaTemplateName": "○○社用",
   "sankaNinzu": 4,
-  "memo": "他2名",
+  "memoSankasha": "他2名",
   "hyojiJun": 100,
   "shosaiList": [
     { "sankashaKubun": 1, "aitesakiKaishaName": "HBLAB株式会社", "aitesakiSankashaName": "経費 太郎", "hyojiJun": 1 },
@@ -225,7 +225,7 @@ export interface SankashaTemplateShosai {
 export interface CreateSankashaTemplateRequest {
   sankashaTemplateName: string;         // <= 250
   sankaNinzu?: number;                  // 0 hoặc 1–999
-  memo?: string;
+  memoSankasha?: string;
   hyojiJun?: number;                    // 0–9999 (default 100)
   shosaiList?: SankashaTemplateShosai[]; // optional, cho phép rỗng
 }

@@ -6,7 +6,7 @@
     "body": {
       "sankashaTemplateName": "○○社用（改）",
       "sankaNinzu": 3,
-      "memo": "メンバー差し替え",
+      "memoSankasha": "メンバー差し替え",
       "hyojiJun": 100,
       "updateVersion": 1,
       "shosaiList": [
@@ -31,7 +31,7 @@
     "body": {
       "sankashaTemplateName": "○○社用",
       "sankaNinzu": 2,
-      "memo": null,
+      "memoSankasha": null,
       "hyojiJun": 100,
       "updateVersion": 2,
       "shosaiList": [
@@ -47,7 +47,7 @@
     "body": {
       "sankashaTemplateName": "縮小テンプレート",
       "sankaNinzu": 1,
-      "memo": null,
+      "memoSankasha": null,
       "hyojiJun": 50,
       "updateVersion": 3,
       "shosaiList": [
